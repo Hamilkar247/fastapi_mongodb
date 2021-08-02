@@ -3,16 +3,24 @@ from pymongo import MongoClient
 from bson import ObjectId
 from typing import Optional
 
-client = MongoClient()
-db = client.test
-print(client.list_database_names())
-dblist = client.list_database_names()
-if "mydatabase" in dblist:
-    print("The database exists.")
+#client = MongoClient()
+#db = client.test
+#print(client.list_database_names())
+#dblist = client.list_database_names()
+#if "api_miernik_reczny" in dblist:
+#    print("The database exists.")
+
 #col = db["blog_posts"]
 #print(db.list_collection_names())
 #print(col.drop())
 #print(db.list_collection_names())
+
+client = MongoClient("mongodb://localhost:27017")
+db_miernik = client["api_miernik"]
+print(client.list_database_names())
+dblist = client.list_database_names()
+if "api_miernik" in dblist:
+    print("The database exist")
 
 
 class PydanticObjectId(ObjectId):
@@ -29,6 +37,43 @@ class PydanticObjectId(ObjectId):
     @classmethod
     def __modify_schema__(cls, field_schema):
         field_schema.update(type='string')
+
+
+class Probka:
+    temperatura: int
+    pm2_5: int
+    pm5: int
+    pm10: int
+    hydroetyl: int
+    tlen: int
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
+
+
+class Pomiar:
+    lista_probek=[]
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
+
+
+class Sesja:
+    _id: Optional[PydanticObjectId] = Field(alias="_id")
+    start_sesji: bool
+    koniec_sesji: bool
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
 
 
 class User(BaseModel):

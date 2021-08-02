@@ -18,5 +18,3 @@ def generataVector():
     array_data.append(f)
     print(f"print array: {array_data}")
     return array_data
-
-generataVector()
