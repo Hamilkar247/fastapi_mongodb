@@ -45,11 +45,11 @@ class User(BaseModel):
 
 
 class StudentModel(BaseModel):
-    id: PydanticObjectId = Field(default_factory=PydanticObjectId, alias="_id")
-    name: str = Field(...)
-    email: EmailStr = Field(...)
-    course: str = Field(...)
-    gpa: float = Field(..., le=4.0)
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    name: str #= Field(...)
+    email: EmailStr #= Field(...)
+    course: str #= Field(...)
+    gpa: float #= Field(..., le=4.0)
 
     class Config:
         allow_population_by_field_name = True
@@ -57,6 +57,7 @@ class StudentModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
+                "_id": "610bd25aab9eb5644afb3f88",
                 "name": "Jane Doe",
                 "email": "jdoe@example.com",
                 "course": "Experiments, Science, and Fashion in Nanophotonics",
