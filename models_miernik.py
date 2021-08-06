@@ -4,12 +4,11 @@ from bson import ObjectId
 from typing import Optional
 
 client = MongoClient("mongodb://localhost:27017")
-db_testowo_miernik = client["testowo_miernik"]
+db_miernik = client["miernik"]
 print(client.list_database_names())
 dblist = client.list_database_names()
-if "testowo_miernik" in dblist:
+if "miernik" in dblist:
     print("baza danych już istnieje")
-
 
 # user = db_testowo_miernik["user"]
 
@@ -57,7 +56,7 @@ class StudentModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                "_id": "610bd25aab9eb5644afb3f88",
+                "_id": "610d2eb8065fa7030e307ab3",
                 "name": "Jane Doe",
                 "email": "jdoe@example.com",
                 "course": "Experiments, Science, and Fashion in Nanophotonics",
