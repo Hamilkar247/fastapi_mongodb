@@ -79,8 +79,8 @@ class Pomiar:
 
 class Sesja:
     _id: Optional[PydanticObjectId] = Field(alias="_id")
-    start_sesji: bool
-    koniec_sesji: bool
+    start_sesji: str
+    koniec_sesji: str
 
     class Config:
         arbitrary_types_allowed = True

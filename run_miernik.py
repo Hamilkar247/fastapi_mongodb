@@ -5,10 +5,58 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 import generateData
-from models_miernik import User, db_miernik, dblist, StudentModel, UpdateStudentModel
+from models_miernik import User, db_miernik, dblist, StudentModel, UpdateStudentModel, Wektor_Probek
 from bson import ObjectId
 
 app = FastAPI()
+
+
+@app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_Probek)
+async def create_wektor_probek(wektor_probek: Wektor_Probek = Body(...)):
+    print(f"rozpoczecie { wektor_probek}")
+    wektor_probek = jsonable_encoder(wektor_probek)
+    new_wektor_probek = db_miernik["wektory_probek"].insert_one(wektor_probek)
+    created_student = db_miernik["wektory_probek"].find_one({"_id": new_wektor_probek.inserted_id})
+    print(created_student)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_student)
+    #if hasattr(wektor_probek, 'id'):
+    #    delattr(wektor_probek, 'id')
+    #ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
+    #wektor_probek.id = ret.inserted_id
+    #return {'wektor_probek': wektor_probek}
+
+
+@app.get('/wektor_probek/', response_description="Zwroc wszystkie wektory probek")
+async def get_wektory_probek():
+    wektory_probek = []
+    for wektor_probek in db_miernik.wektory_probek.find():
+        wektory_probek.append(Wektor_Probek(**wektor_probek))
+    return {'wektory_probek': wektory_probek}
+
+
+@app.get("/wektor_probek/{id}", response_description="Zwroc jedna probke")#, response_model=Wektor_Probek)
+async def pokaz_wektor_probek(id: str):
+    mycol = db_miernik['wektory_probek']
+    for x in db_miernik['wektory_probek'].find():
+        print(x)
+
+    if (wektor_probek := db_miernik["wektory_probek"].find_one({"_id": id})) is not None: #usuwam await przez db_miernik
+        return wektor_probek
+    raise HTTPException(status_code=404, detail=f"Wektor probek {id} nie znaleziono")
+
+
+@app.delete("/delete_wektor_probek/{id}", response_description="Usuń wektor probek")
+async def delete_wektor_probek(id: str):
+    delete_result = db_miernik["wektory_probek"].delete_one({"_id": id})
+    if delete_result.deleted_count == 1:
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+    raise HTTPException(status_code=403, detail=f"Wektora próbek {id} nie znaleziono")
+
+
+@app.delete("/drop_wektory_probek/", response_description="drop wektor_probek")#, response_model=Wektor_Probek)
+async def drop_wektory_probek():
+    db_miernik['wektory_probek'].drop()
+    return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
 
 
 @app.post('/user/')
@@ -54,7 +102,7 @@ async def list_students():
 
 @app.get("/show_students/{id}", response_description="Get a single student", response_model=StudentModel)
 async def show_student(id: str):
-    if (student := await db_miernik["students"].find_one({"_id": id})) is not None:
+    if (student := db_miernik["students"].find_one({"_id": id})) is not None: # usunalem await
         return student
     raise HTTPException(status_code=404, detail=f"Student {id} not found")
 
@@ -84,6 +132,6 @@ async def delete_student(id: str):
 
 
 @app.delete("/drop_students/", response_description="drop all students")
-async def delete_student():
+async def drop_student():
     db_miernik['students'].drop()
     return HTTPException(status_code=404, detail=f"Students collection cannot be droped")

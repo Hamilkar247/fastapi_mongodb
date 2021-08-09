@@ -43,6 +43,44 @@ class User(BaseModel):
         }
 
 
+class Wektor_Probek(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    temperatura: str
+    pm2_5: str
+    pm5: str
+    pm10: str
+    hydroetyl: str
+    tlen: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "_id": "610d2eb8065fa7030e307ab3",
+                "temperatura": "10 C",
+                "pm2_5": "2",
+                "pm5": "1",
+                "pm10": "3.2",
+                "hydroetyl": "2.4",
+                "tlen": "2.0"
+            }
+        }
+
+
+class Sesja:
+    _id: Optional[PydanticObjectId] = Field(alias="_id")
+    start_sesji: str
+    koniec_sesji: str
+
+    class Config:
+        arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: str
+        }
+
+
 class StudentModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     name: str #= Field(...)
@@ -56,6 +94,7 @@ class StudentModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
+                #                "_id": "610d2eb8065fa7030e307ab3",
                 "_id": "610d2eb8065fa7030e307ab3",
                 "name": "Jane Doe",
                 "email": "jdoe@example.com",
