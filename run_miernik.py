@@ -5,15 +5,16 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 import generateData
-from models_miernik import User, db_miernik, dblist, StudentModel, UpdateStudentModel, Wektor_Probek
+from models_miernik import UserModel, db_miernik, dblist, StudentModel, UpdateStudentModel, Wektor_ProbekModel
 from bson import ObjectId
+
 
 app = FastAPI()
 
 
-@app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_Probek)
-async def create_wektor_probek(wektor_probek: Wektor_Probek = Body(...)):
-    print(f"rozpoczecie { wektor_probek}")
+@app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_ProbekModel)
+async def create_wektor_probek(wektor_probek: Wektor_ProbekModel = Body(...)):
+    print(f"rozpoczecie {wektor_probek}")
     wektor_probek = jsonable_encoder(wektor_probek)
     new_wektor_probek = db_miernik["wektory_probek"].insert_one(wektor_probek)
     created_student = db_miernik["wektory_probek"].find_one({"_id": new_wektor_probek.inserted_id})
@@ -30,7 +31,7 @@ async def create_wektor_probek(wektor_probek: Wektor_Probek = Body(...)):
 async def get_wektory_probek():
     wektory_probek = []
     for wektor_probek in db_miernik.wektory_probek.find():
-        wektory_probek.append(Wektor_Probek(**wektor_probek))
+        wektory_probek.append(Wektor_ProbekModel(**wektor_probek))
     return {'wektory_probek': wektory_probek}
 
 
@@ -60,7 +61,7 @@ async def drop_wektory_probek():
 
 
 @app.post('/user/')
-async def create_user(user: User):
+async def create_user(user: UserModel):
     if hasattr(user, 'id'):
         delattr(user, 'id')
     ret = db_miernik.users.insert_one(user.dict(by_alias=True))
@@ -72,7 +73,7 @@ async def create_user(user: User):
 async def get_users():
     users = []
     for user in db_miernik.users.find():
-        users.append(User(**user))
+        users.append(UserModel(**user))
     return {'users': users}
 
 

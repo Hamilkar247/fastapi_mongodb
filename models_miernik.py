@@ -29,7 +29,7 @@ class PydanticObjectId(ObjectId):
         field_schema.update(type='string')
 
 
-class User(BaseModel):
+class UserModel(BaseModel):
     # uwaga - pydantic nie obsluguje nazw _id, z kolei mongodb tak zaczyna idki-stąd alias
     id: Optional[PydanticObjectId] = Field(alias='_id')
     name: str
@@ -43,7 +43,7 @@ class User(BaseModel):
         }
 
 
-class Wektor_Probek(BaseModel):
+class Wektor_ProbekModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     temperatura: str
     pm2_5: str
@@ -69,7 +69,7 @@ class Wektor_Probek(BaseModel):
         }
 
 
-class Sesja:
+class SesjaModel:
     _id: Optional[PydanticObjectId] = Field(alias="_id")
     start_sesji: str
     koniec_sesji: str
