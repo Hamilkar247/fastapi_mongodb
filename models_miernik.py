@@ -48,12 +48,12 @@ class UserModel(BaseModel):
 
 class Wektor_ProbekModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
-    temperatura: str
-    pm2_5: str
-    pm5: str
-    pm10: str
-    hydroetyl: str
-    tlen: str
+    chlorowodor: Optional[str]
+    fluorowodor: Optional[str]
+    formaldechyd: Optional[str]
+    pm1: Optional[str]
+    pm2_5: Optional[str]
+    pm5: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
