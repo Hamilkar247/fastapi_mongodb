@@ -75,8 +75,8 @@ class Wektor_ProbekModel(BaseModel):
 class SesjaModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     nazwa_sesji: str
-    start_sesji: str
-    koniec_sesji: str
+    start_sesji: Optional[str]
+    koniec_sesji: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
@@ -84,10 +84,7 @@ class SesjaModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                #"_id": "610d2eb8065fa7030e307ab3",
-                "nazwa_sesji": "str",
-                #"start_sesji": "10000111-110",
-                #"koniec_sesji": "10002223-1212"
+                "nazwa_sesji": "str"
             }
         }
 

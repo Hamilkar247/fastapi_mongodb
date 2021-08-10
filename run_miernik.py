@@ -27,22 +27,37 @@ app = FastAPI()
 async def create_sesja(sesja: SesjaModel = Body(...)):
     now = datetime.now()
     print("now =", now)
-    dt_string = now.strftime("%d/%m/%y %H:%<:%S")
+    dt_string = now.strftime("%d/%m/%y %H:%M:%S")
     print(f"date and time = {dt_string}")
 
-    print(f"rozpoczecia {sesja}")
+    print(f"rozpoczecia 1: {sesja}")
     if hasattr(sesja, 'id'):
        delattr(sesja, 'id')
-    ret = db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
-    sesja.id = ret.inserted_id
     sesja.start_sesji = dt_string
     sesja.koniec_sesji = "nie zakonczona"
-    # return {'wektor_probek': wektor_probek}
-    print(f"rozpoczecie {sesja}")
+    print(f"{sesja}")
+    #wrzucamy do bazy danych wraz z wygenerowanym kluczem
+    ret = db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
+    print(f"adres bitowy rekordu {ret}")
+    print(ret)
+    #print(f"sesja.start_sesji {ret.start_sesji}")
+    #ret.start_sesji = dt_string
+    #print(f"sesja.start_sesji {ret.start_sesji}")
+    #ret.koniec_sesji = "nie zakonczona"
+    ####### return {'wektor_probek': wektor_probek}
+    ######print(f"rozpoczecie 2: {sesja}")
+    ######print(f"ahjo koncowe: {sesja}")
+    ######myquery = {"_id": sesja.id}
+    ######for x in db_miernik.sesja.find(myquery):
+    ######    print("znalazlo rekordy !")
+    ######    print(x)
+    #######db_miernik.sesja.update_one(myquery, sesja)
+
+    #######new_sesja = db_miernik["sesje"].insert_one(sesja)
+    #######created_sesja = db_miernik["sesje"].find_one({"_id": sesja.inserted_id})
+    #######print(sesja)
+
     sesja = jsonable_encoder(sesja)
-    #new_sesja = db_miernik["sesje"].insert_one(sesja)
-    #created_sesja = db_miernik["sesje"].find_one({"_id": sesja.inserted_id})
-    #print(sesja)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
 
 
