@@ -61,7 +61,7 @@ class Wektor_ProbekModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                "_id": "610d2eb8065fa7030e307ab3",
+                #"_id": "610d2eb8065fa7030e307ab3",
                 "temperatura": "10 C",
                 "pm2_5": "2",
                 "pm5": "1",

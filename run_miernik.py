@@ -71,11 +71,21 @@ async def drop_sesje():
 @app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_ProbekModel)
 async def create_wektor_probek(wektor_probek: Wektor_ProbekModel = Body(...)):
     print(f"rozpoczecie {wektor_probek}")
+    if hasattr(wektor_probek, 'id'):
+        delattr(wektor_probek, 'id')
+    ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
+    wektor_probek.id = ret.inserted_id
+    print(f"rozpoczecie {wektor_probek}")
     wektor_probek = jsonable_encoder(wektor_probek)
-    new_wektor_probek = db_miernik["wektory_probek"].insert_one(wektor_probek)
-    created_student = db_miernik["wektory_probek"].find_one({"_id": new_wektor_probek.inserted_id})
-    print(created_student)
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_student)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
+
+
+    #wektor_probek = jsonable_encoder(wektor_probek)
+    #new_wektor_probek = db_miernik["wektory_probek"].insert_one(wektor_probek)
+    #created_student = db_miernik["wektory_probek"].find_one({"_id": new_wektor_probek.inserted_id})
+    #print(created_student)
+    #return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_student)
+
     #if hasattr(wektor_probek, 'id'):
     #    delattr(wektor_probek, 'id')
     #ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
@@ -110,13 +120,10 @@ async def delete_wektor_probek(id: str):
     raise HTTPException(status_code=403, detail=f"Wektora próbek {id} nie znaleziono")
 
 
-
-
 @app.delete("/drop_wektory_probek/", response_description="drop wektor_probek")#, response_model=Wektor_Probek)
 async def drop_wektory_probek():
     db_miernik['wektory_probek'].drop()
     return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
-
 
 
 @app.post('/user/')
