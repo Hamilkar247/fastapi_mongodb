@@ -4,14 +4,16 @@ from bson import ObjectId
 from typing import Optional
 
 client = MongoClient("mongodb://localhost:27017")
-db_testowo_miernik = client["testowo_miernik"]
+db_miernik = client["miernik"]
 print(client.list_database_names())
-dblist = client.list_database_names()
-if "testowo_miernik" in dblist:
-    print("baza danych już istnieje")
-
-
-# user = db_testowo_miernik["user"]
+print(db_miernik.list_collection_names())
+print(db_miernik["sesje"])
+#if "sesje" in db_miernik:
+#    print("baza danych już istnieje")
+#    print(db_miernik['sesje'])
+mycol = db_miernik["sesje"]
+for x in mycol.find():
+    print(x)
 
 
 class PydanticObjectId(ObjectId):
@@ -30,7 +32,7 @@ class PydanticObjectId(ObjectId):
         field_schema.update(type='string')
 
 
-class User(BaseModel):
+class UserModel(BaseModel):
     # uwaga - pydantic nie obsluguje nazw _id, z kolei mongodb tak zaczyna idki-stąd alias
     id: Optional[PydanticObjectId] = Field(alias='_id')
     name: str
@@ -41,6 +43,49 @@ class User(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {
             ObjectId: str
+        }
+
+
+class Wektor_ProbekModel(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    chlorowodor: Optional[str]
+    fluorowodor: Optional[str]
+    formaldechyd: Optional[str]
+    pm1: Optional[str]
+    pm2_5: Optional[str]
+    pm5: Optional[str]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                #"_id": "610d2eb8065fa7030e307ab3",
+                "chlorowodor": "0.06",
+                "fluorowodor": "2.4",
+                "formaldechyd": "2.0",
+                "pm1": "3.2",
+                "pm2_5": "2.4",
+                "pm5": "1"
+            }
+        }
+
+
+class SesjaModel(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    nazwa_sesji: str
+    start_sesji: Optional[str]
+    koniec_sesji: Optional[str]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "nazwa_sesji": "str"
+            }
         }
 
 
@@ -57,7 +102,8 @@ class StudentModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                "_id": "610bd25aab9eb5644afb3f88",
+                #                "_id": "610d2eb8065fa7030e307ab3",
+                "_id": "610d2eb8065fa7030e307ab3",
                 "name": "Jane Doe",
                 "email": "jdoe@example.com",
                 "course": "Experiments, Science, and Fashion in Nanophotonics",

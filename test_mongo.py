@@ -6,22 +6,22 @@ mycol = mydb["customers"]
 
 print(mydb.list_collection_names())
 
-# mydict = { "name" : "Erich", "address" : "11 September" }
+#mydict = { "name" : "Erich", "address" : "11 September" }
 
-# mylist = [
-#  { "name": "Amy", "address": "Apple st 652"},
-#  { "name": "Hannah", "address": "Mountain 21"},
-#  { "name": "Michael", "address": "Valley 345"},
-#  { "name": "Sandy", "address": "Ocean blvd 2"},
-#  { "name": "Betty", "address": "Green Grass 1"},
-#  { "name": "Richard", "address": "Sky st 331"},
-#  { "name": "Susan", "address": "One way 98"},
-#  { "name": "Vicky", "address": "Yellow Garden 2"},
-#  { "name": "Ben", "address": "Park Lane 38"},
-#  { "name": "William", "address": "Central st 954"},
-#  { "name": "Chuck", "address": "Main Road 989"},
-#  { "name": "Viola", "address": "Sideway 1633"}
-# ]
+mylist = [
+  { "name": "Amy", "address": "Apple st 652"},
+  { "name": "Hannah", "address": "Mountain 21"},
+  { "name": "Michael", "address": "Valley 345"},
+  { "name": "Sandy", "address": "Ocean blvd 2"},
+  { "name": "Betty", "address": "Green Grass 1"},
+  { "name": "Richard", "address": "Sky st 331"},
+  { "name": "Susan", "address": "One way 98"},
+  { "name": "Vicky", "address": "Yellow Garden 2"},
+  { "name": "Ben", "address": "Park Lane 38"},
+  { "name": "William", "address": "Central st 954"},
+  { "name": "Chuck", "address": "Main Road 989"},
+  { "name": "Viola", "address": "Sideway 1633"}
+]
 
 # mylist = [
 # { "_id": 1, "name": "John", "address": "Highway 37"},
@@ -40,26 +40,29 @@ print(mydb.list_collection_names())
 # { "_id": 14, "name": "Viola", "address": "Sideway 1633"}
 # ]
 
-# x = mycol.insert_one(mydict)
-# x = mycol.insert_many(mylist)
+#x = mycol.insert_one(mydict)
+x = mycol.insert_many(mylist)
 
-# x = mycol.find_one()
+#x = mycol.find_one()
 
-# print(x.inserted_ids)
+print(x.inserted_ids)
 
-# print(x)
+print(x)
 
 #Return all documents in the "customers" collection, and print each document:
+print("### zwroc wszystko z dokumentu customers kolekcji i wydrukuj")
 for x in mycol.find():
     print(x)
 
 # drukuj ale bez id
-# for x in mycol.find({}, {"_id": 0, "name": 1, "address": 1}):
-#    print(x)
+print("### drukuj ale bez id")
+for x in mycol.find({}, {"_id": 0, "name": 1, "address": 1}):
+   print(x)
 
 # wydrukuj wszystko bez adresu
-# for x in mycol.find({}, {"address": 0}):
-#    print(x)
+print("### wydrukuj wszystko bez adresu")
+for x in mycol.find({}, {"address": 0}):
+   print(x)
 
 # You get an error if you specify both 0 and 1 values in the same object
 # (except if one of the fields is the _id field):
@@ -67,11 +70,12 @@ for x in mycol.find():
 #    print(x)
 
 ######## proste zapytanie
-# myquery = {"address": "Park Lane 38"}
-# mydoc = mycol.find(myquery)
+print("### Proste zapytanie")
+myquery = {"address": "Park Lane 38"}
+mydoc = mycol.find(myquery)
 #
-# for x in mydoc:
-#    print(x)
+for x in mydoc:
+   print(x)
 
 ###### nieco bardziej skomplikowane zapytanie - wyszukuje zapytania zaczynajace sie litera "S"
 # myquery = {"address": {"$regex": "^S"}}
