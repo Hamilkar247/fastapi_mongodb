@@ -5,11 +5,67 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 import generateData
-from models_miernik import UserModel, db_miernik, dblist, StudentModel, UpdateStudentModel, Wektor_ProbekModel
+from models_miernik import UserModel, db_miernik, StudentModel, UpdateStudentModel, Wektor_ProbekModel
+from models_miernik import SesjaModel
 from bson import ObjectId
+from datetime import datetime
+
+
+###### przyklad czasu
+##datetime object containing current date and time
+#now = datetime.now()
+#print("now =", now)
+## dd/mm/yy H:M:S
+#dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+#print("date and time =", dt_string)
 
 
 app = FastAPI()
+
+
+@app.post("/sesja/", response_description="Stworz sesje", response_model=SesjaModel)
+async def create_sesja(sesja: SesjaModel = Body(...)):
+    print(f"rozpoczecia {sesja}")
+    if hasattr(sesja, 'id'):
+       delattr(sesja, 'id')
+    ret = db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
+    sesja.id = ret.inserted_id
+    # return {'wektor_probek': wektor_probek}
+    print(f"rozpoczecie {sesja}")
+    sesja = jsonable_encoder(sesja)
+    #new_sesja = db_miernik["sesje"].insert_one(sesja)
+    #created_sesja = db_miernik["sesje"].find_one({"_id": sesja.inserted_id})
+    #print(sesja)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+
+
+@app.get('/sesja/', response_description="Zwroc wszystkie sesje")
+async def get_sesje():
+    sesje_zbior = []
+    for sesja in db_miernik.sesje.find():
+        sesje_zbior.append(SesjaModel(**sesja))
+    return {"sesje": sesje_zbior}
+
+
+@app.get("/sesja/{id}", response_description="Zwroc jedna sesje")
+async def pokaz_sesje(id: str):
+    if (sesja := db_miernik['sesje'].find_one({"_id": id})) is not None:
+        return sesja
+    raise HTTPException(status_code=404, detail=f"Sesji {id} nie znaleziono")
+
+
+@app.delete("/delete_sesja/{id}", response_description="Usuń sesje")
+async def delete_sesja(id: str):
+    delete_result = db_miernik["sesje"].delete_one({"_id": id})
+    if delete_result.deleted_count == 1:
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+    raise HTTPException(status_code=403, detail=f"Sesje {id} nie znaleziono")
+
+
+@app.delete("/drop_sesje/", response_description="drop sesje")#, response_model=Wektor_Probek)
+async def drop_sesje():
+    db_miernik['sesje'].drop()
+    return HTTPException(status_code=404, detail=f"Kolekcje sesji nie możesz wyczyścić")
 
 
 @app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_ProbekModel)
@@ -54,10 +110,13 @@ async def delete_wektor_probek(id: str):
     raise HTTPException(status_code=403, detail=f"Wektora próbek {id} nie znaleziono")
 
 
+
+
 @app.delete("/drop_wektory_probek/", response_description="drop wektor_probek")#, response_model=Wektor_Probek)
 async def drop_wektory_probek():
     db_miernik['wektory_probek'].drop()
     return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
+
 
 
 @app.post('/user/')

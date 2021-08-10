@@ -6,11 +6,14 @@ from typing import Optional
 client = MongoClient("mongodb://localhost:27017")
 db_miernik = client["miernik"]
 print(client.list_database_names())
-dblist = client.list_database_names()
-if "miernik" in dblist:
-    print("baza danych już istnieje")
-
-# user = db_testowo_miernik["user"]
+print(db_miernik.list_collection_names())
+print(db_miernik["sesje"])
+#if "sesje" in db_miernik:
+#    print("baza danych już istnieje")
+#    print(db_miernik['sesje'])
+mycol = db_miernik["sesje"]
+for x in mycol.find():
+    print(x)
 
 
 class PydanticObjectId(ObjectId):
@@ -69,15 +72,21 @@ class Wektor_ProbekModel(BaseModel):
         }
 
 
-class SesjaModel:
-    _id: Optional[PydanticObjectId] = Field(alias="_id")
+class SesjaModel(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
     start_sesji: str
     koniec_sesji: str
 
     class Config:
+        allow_population_by_field_name = True
         arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                #"_id": "610d2eb8065fa7030e307ab3",
+                "start_sesji": "10000111-110",
+                "koniec_sesji": "10002223-1212"
+            }
         }
 
 
