@@ -25,11 +25,18 @@ app = FastAPI()
 
 @app.post("/sesja/", response_description="Stworz sesje", response_model=SesjaModel)
 async def create_sesja(sesja: SesjaModel = Body(...)):
+    now = datetime.now()
+    print("now =", now)
+    dt_string = now.strftime("%d/%m/%y %H:%<:%S")
+    print(f"date and time = {dt_string}")
+
     print(f"rozpoczecia {sesja}")
     if hasattr(sesja, 'id'):
        delattr(sesja, 'id')
     ret = db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
     sesja.id = ret.inserted_id
+    sesja.start_sesji = dt_string
+    sesja.koniec_sesji = "nie zakonczona"
     # return {'wektor_probek': wektor_probek}
     print(f"rozpoczecie {sesja}")
     sesja = jsonable_encoder(sesja)
