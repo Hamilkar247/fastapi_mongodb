@@ -62,12 +62,12 @@ class Wektor_ProbekModel(BaseModel):
         schema_extra = {
             "example": {
                 #"_id": "610d2eb8065fa7030e307ab3",
-                "temperatura": "10 C",
-                "pm2_5": "2",
-                "pm5": "1",
-                "pm10": "3.2",
-                "hydroetyl": "2.4",
-                "tlen": "2.0"
+                "chlorowodor": "0.06",
+                "fluorowodor": "2.4",
+                "formaldechyd": "2.0",
+                "pm1": "3.2",
+                "pm2_5": "2.4",
+                "pm5": "1"
             }
         }
 
