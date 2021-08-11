@@ -50,27 +50,25 @@ class SesjaModel(BaseModel):
         }
 
 
-class UserModel(BaseModel):
+class UzytkownikModel(BaseModel):
     # uwaga - pydantic nie obsluguje nazw _id, z kolei mongodb tak zaczyna idki-stąd alias
     id: Optional[PydanticObjectId] = Field(alias='_id')
-    name: str
-    username: str
+    imie: str
+    nick: str
     email: str
-    #sesje: List[SesjaModel]
 
     class Config:
         arbitrary_types_allowed = True
         json_encoders = {
             ObjectId: str
         }
-        #schema_extra = {
-        #    "example": {
-        #        "name": "str",
-        #        "username": "str",
-        #        "email": "str",
-        #        "sesje":
-        #    }
-        #}
+        schema_extra = {
+            "example": {
+                "imie": "str",
+                "nick": "str",
+                "email": "str"
+            }
+        }
 
 
 class Wektor_ProbekModel(BaseModel):

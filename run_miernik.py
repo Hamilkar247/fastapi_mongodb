@@ -5,7 +5,7 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 import generateData
-from models_miernik import UserModel, db_miernik, StudentModel, \
+from models_miernik import UzytkownikModel, db_miernik, StudentModel, \
     UpdateStudentModel, Wektor_ProbekModel, UrzadzenieModel, SensorModel
 from models_miernik import SesjaModel
 from bson import ObjectId
@@ -109,12 +109,15 @@ async def drop_urzadzenia():
 
 
 @app.post("/sesja/", response_description="Stworz sesje", response_model=SesjaModel)
-async def create_sesja(sesja: SesjaModel = Body(...)):
+async def create_sesja(id_uzytkownika: str, sesja: SesjaModel = Body(...)):
+    print(f"id_usera {id_uzytkownika}")
+
     now = datetime.now()
     print("now =", now)
     dt_string = now.strftime("%d/%m/%y %H:%M:%S")
     print(f"date and time = {dt_string}")
     print(f"rozpoczecia : {sesja}")
+
     if hasattr(sesja, 'id'):
        delattr(sesja, 'id')
     sesja.start_sesji = dt_string
@@ -213,21 +216,21 @@ async def drop_wektory_probek():
     return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
 
 
-@app.post('/user/')
-async def create_user(user: UserModel):
-    if hasattr(user, 'id'):
-        delattr(user, 'id')
-    ret = db_miernik.users.insert_one(user.dict(by_alias=True))
-    user.id = ret.inserted_id
-    return {'user': user}
+@app.post('/uzytkownik/')
+async def create_uzytkownik(uzytkownik: UzytkownikModel):
+    if hasattr(uzytkownik, 'id'):
+        delattr(uzytkownik, 'id')
+    ret = db_miernik.uzytkownicy.insert_one(uzytkownik.dict(by_alias=True))
+    uzytkownik.id = ret.inserted_id
+    return {'uzytkownik': uzytkownik}
 
 
-@app.get('/user/')
-async def get_users():
-    users = []
-    for user in db_miernik.users.find():
-        users.append(UserModel(**user))
-    return {'users': users}
+@app.get('/uzytkownik/')
+async def get_uzytkownik():
+    uzytkownicy = []
+    for uzytkownik in db_miernik.uzytkownicy.find():
+        uzytkownicy.append(UzytkownikModel(**uzytkownik))
+    return {'uzytkownicy': uzytkownicy}
 
 
 @app.post("/create_student/", response_description="Add new student", response_model=StudentModel)
