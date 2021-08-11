@@ -79,6 +79,22 @@ async def create_urzadzenia(urzadzenie: UrzadzenieModel = Body(...)):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=urzadzenie)
 
 
+@app.post("/urzadzenie/{id_uzytkownik", response_description="Stwórz urządzenia", response_model=UrzadzenieModel)
+async def create_urzadzenia(id_uzytkownika: str, urzadzenie: UrzadzenieModel = Body(...)):
+    print(f"id_uzytkownika {id_uzytkownika}")
+    uzytkownik = db_miernik.uzytkownicy.find_one({"_id": ObjectId(id_uzytkownika)})
+    print(uzytkownik)
+    if uzytkownik is not None:
+        if hasattr(urzadzenie, "id"):
+            delattr(urzadzenie, "id")
+        urzadzenie.id_uzytkownika = id_uzytkownika
+        db_miernik.urzadzenia.insert_one(urzadzenie.dict(by_alias=True))
+        urzadzenie = jsonable_encoder(urzadzenie)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=urzadzenie)
+    else:
+        raise HTTPException(status_code=404, detail=f"Użytkownik o id: {id_uzytkownika} nie znaleziono")
+
+
 @app.get('/urzadzenie/', response_description="Zwróc wszystkie urzadzenia")
 async def get_urzadzenie():
     urzadzenia_zbior = []
@@ -142,6 +158,7 @@ async def create_sesja(id_uzytkownika: str, sesja: SesjaModel = Body(...)):
     if uzytkownik is not None:
         if hasattr(sesja, 'id'):
             delattr(sesja, 'id')
+        sesja.id_uzytkownika=id_uzytkownika
         sesja.start_sesji = dt_string
         sesja.koniec_sesji = "nie zakonczona"
         print(f"{sesja}")

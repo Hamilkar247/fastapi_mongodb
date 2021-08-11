@@ -100,6 +100,7 @@ class Wektor_ProbekModel(BaseModel):
 class UrzadzenieModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     nazwa_urzadzenia: str
+    id_uzytkownika: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
