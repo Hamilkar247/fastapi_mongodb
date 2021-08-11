@@ -179,7 +179,7 @@ async def get_sesje():
 
 
 @app.get("/sesja/{id}", response_description="Zwroc jedna sesje")
-async def pokaz_sesje(id: str):
+async def get_sesje_id(id: str):
     if (sesja := db_miernik['sesje'].find_one({"_id": id})) is not None:
         return sesja
     raise HTTPException(status_code=404, detail=f"Sesji {id} nie znaleziono")
