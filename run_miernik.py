@@ -109,8 +109,7 @@ async def drop_urzadzenia():
 
 
 @app.post("/sesja/", response_description="Stworz sesje", response_model=SesjaModel)
-async def create_sesja(id_uzytkownika: str, sesja: SesjaModel = Body(...)):
-    print(f"id_usera {id_uzytkownika}")
+async def create_sesja(sesja: SesjaModel = Body(...)):
     now = datetime.now()
     print("now =", now)
     dt_string = now.strftime("%d/%m/%y %H:%M:%S")
@@ -126,6 +125,32 @@ async def create_sesja(id_uzytkownika: str, sesja: SesjaModel = Body(...)):
     db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
     sesja = jsonable_encoder(sesja)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+
+
+@app.post("/sesja/{id_uzytkownika}", response_description="Stworz sesje", response_model=SesjaModel)
+async def create_sesja(id_uzytkownika: str, sesja: SesjaModel = Body(...)):
+    print(f"id_usera {id_uzytkownika}")
+    now = datetime.now()
+    print("now =", now)
+    dt_string = now.strftime("%d/%m/%y %H:%M:%S")
+    print(f"date and time = {dt_string}")
+    print(f"rozpoczecia : {sesja}")
+
+    print(f"id_uzytkownika: {id_uzytkownika}")
+    uzytkownik = db_miernik.uzytkownicy.find_one({"_id": ObjectId(id_uzytkownika)})
+    print(uzytkownik)
+    if uzytkownik is not None:
+        if hasattr(sesja, 'id'):
+            delattr(sesja, 'id')
+        sesja.start_sesji = dt_string
+        sesja.koniec_sesji = "nie zakonczona"
+        print(f"{sesja}")
+        #wrzucamy do bazy danych wraz z wygenerowanym kluczem
+        db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
+        sesja = jsonable_encoder(sesja)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+    else:
+        raise HTTPException(status_code=404, detail=f"Użytkownika o id: {id_uzytkownika} nie znaleziono!")
 
 
 @app.get('/sesja/', response_description="Zwroc wszystkie sesje")
