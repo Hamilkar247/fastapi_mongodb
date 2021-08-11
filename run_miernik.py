@@ -6,7 +6,7 @@ from starlette.responses import JSONResponse
 
 import generateData
 from models_miernik import UzytkownikModel, db_miernik, StudentModel, \
-    UpdateStudentModel, Wektor_ProbekModel, UrzadzenieModel, SensorModel
+    UpdateStudentModel, Wektor_ProbekModel, UrzadzenieModel, SensorModel, PomiarModel
 from models_miernik import SesjaModel
 from bson import ObjectId
 from datetime import datetime
@@ -199,6 +199,41 @@ async def drop_sesje():
     return HTTPException(status_code=404, detail=f"Kolekcje sesji nie możesz wyczyścić")
 
 
+@app.post("/pomiar/", response_description="Stworz pomiar", response_model = PomiarModel)
+async def create_pomiar(pomiar: PomiarModel = Body(...)):
+    if hasattr(pomiar, 'id'):
+        delattr(pomiar, 'id')
+    db_miernik.wektory_probek.insert_one(pomiar.dict(by_alias=True))
+    wektor_probek = jsonable_encoder(pomiar)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
+
+
+@app.post("/pomiar/{id_sensor}", response_description="Stworz pomiar", response_model = PomiarModel)
+async def create_pomiar(wartosc: int, id_sensor: str, pomiar: PomiarModel = Body(...)):
+    print(f"id_sensor {id_sensor}")
+    sensor = db_miernik.sensory.find_one({"_id": ObjectId(id_sensor)})
+    print(sensor)
+    if sensor is not None:
+        if hasattr(pomiar, 'id'):
+            delattr(pomiar, 'id')
+        db_miernik.pomiary.insert_one(pomiar.dict(by_alias=True))
+        pomiar.zarejestrowana_wartosc=wartosc
+        pomiar = jsonable_encoder(pomiar)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
+    else:
+        raise HTTPException(status_code=404, detail=f"sensor o id:{id_sensor} nie znalazlem!")
+
+
+@app.get('/pomiar/', response_description="Zwroc wszystkie pomiary")
+async def get_pomiar():
+    pomiary = []
+    for pomiar in db_miernik.pomiary.find():
+        pomiary.append(Wektor_ProbekModel(**pomiar))
+    return {'pomiary': pomiary}
+
+
+
+
 @app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_ProbekModel)
 async def create_wektor_probek(wektor_probek: Wektor_ProbekModel = Body(...)):
     if hasattr(wektor_probek, 'id'):
@@ -259,7 +294,6 @@ async def create_uzytkownik(uzytkownik: UzytkownikModel):
     if hasattr(uzytkownik, 'id'):
         delattr(uzytkownik, 'id')
     db_miernik.uzytkownicy.insert_one(uzytkownik.dict(by_alias=True))
-    uzytkownik.id = ret.inserted_id
     return {'uzytkownik': uzytkownik}
 
 

@@ -97,6 +97,23 @@ class Wektor_ProbekModel(BaseModel):
         }
 
 
+class PomiarModel(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    sensor_id: Optional[str]
+    badany_parametr: Optional[str]
+    zarejestrowana_wartosc: Optional[str]
+    czas_zarejestrowania_pomiaru: Optional[str]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+            }
+        }
+
+
 class UrzadzenieModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     nazwa_urzadzenia: str
