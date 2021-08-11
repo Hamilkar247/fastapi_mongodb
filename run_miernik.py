@@ -160,7 +160,6 @@ async def drop_sesje():
 
 @app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_ProbekModel)
 async def create_wektor_probek(wektor_probek: Wektor_ProbekModel = Body(...)):
-    print(f"rozpoczecie {wektor_probek}")
     if hasattr(wektor_probek, 'id'):
         delattr(wektor_probek, 'id')
     ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
@@ -170,17 +169,21 @@ async def create_wektor_probek(wektor_probek: Wektor_ProbekModel = Body(...)):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
 
 
-    #wektor_probek = jsonable_encoder(wektor_probek)
-    #new_wektor_probek = db_miernik["wektory_probek"].insert_one(wektor_probek)
-    #created_student = db_miernik["wektory_probek"].find_one({"_id": new_wektor_probek.inserted_id})
-    #print(created_student)
-    #return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_student)
-
-    #if hasattr(wektor_probek, 'id'):
-    #    delattr(wektor_probek, 'id')
-    #ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
-    #wektor_probek.id = ret.inserted_id
-    #return {'wektor_probek': wektor_probek}
+@app.post("/wektor_probek/{id_sesji}", response_description="Stworz wektor probek, powiazany z konkretną sesją"
+                                                            , response_model=Wektor_ProbekModel)
+async def create_wektor_probek(id_sesji: str, wektor_probek: Wektor_ProbekModel = Body(...)):
+    print(f"id_sesji {id_sesji}")
+    sesje = db_miernik.sesje.find_one({"_id": ObjectId(id_sesji)})
+    print(sesje)
+    if sesje is not None:
+        if hasattr(wektor_probek, "id"):
+            delattr(wektor_probek, "id")
+        wektor_probek.id_sesji=id_sesji
+        db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
+        wektor_probek = jsonable_encoder(wektor_probek)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
+    else:
+        raise HTTPException(status_code=404, detail=f"sesji o id:{id_sesji} nie znaleziono!")
 
 
 @app.get('/wektor_probek/', response_description="Zwroc wszystkie wektory probek")
