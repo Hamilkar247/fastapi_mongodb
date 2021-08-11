@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
+from pydantic.decorator import List
 from pymongo import MongoClient
 from bson import ObjectId
 from typing import Optional
@@ -32,18 +33,44 @@ class PydanticObjectId(ObjectId):
         field_schema.update(type='string')
 
 
+class SesjaModel(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    nazwa_sesji: str
+    start_sesji: Optional[str]
+    koniec_sesji: Optional[str]
+    owner: Optional[str]
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "nazwa_sesji": "str"
+            }
+        }
+
+
 class UserModel(BaseModel):
     # uwaga - pydantic nie obsluguje nazw _id, z kolei mongodb tak zaczyna idki-stąd alias
     id: Optional[PydanticObjectId] = Field(alias='_id')
     name: str
     username: str
     email: str
+    #sesje: List[SesjaModel]
 
     class Config:
         arbitrary_types_allowed = True
         json_encoders = {
             ObjectId: str
         }
+        #schema_extra = {
+        #    "example": {
+        #        "name": "str",
+        #        "username": "str",
+        #        "email": "str",
+        #        "sesje":
+        #    }
+        #}
 
 
 class Wektor_ProbekModel(BaseModel):
@@ -72,23 +99,6 @@ class Wektor_ProbekModel(BaseModel):
         }
 
 
-class SesjaModel(BaseModel):
-    id: Optional[PydanticObjectId] = Field(alias="_id")
-    nazwa_sesji: str
-    start_sesji: Optional[str]
-    koniec_sesji: Optional[str]
-
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
-        schema_extra = {
-            "example": {
-                "nazwa_sesji": "str"
-            }
-        }
-
-
 class UrzadzenieModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     nazwa_urzadzenia: str
@@ -108,6 +118,7 @@ class SensorModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     nazwa_sensora: str
     badany_parametr: str
+    urzadzenie_id: Optional[str]
 
     class Config:
         allow_population_by_field_name = True

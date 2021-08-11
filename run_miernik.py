@@ -24,6 +24,22 @@ async def create_sensor(sensory: SensorModel = Body(...)):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=sensory)
 
 
+@app.post("/sensor/{id}", response_description="Stwórz sensor, podlaczajac go pod urzadzenie", response_model=SensorModel)
+async def create_sensor(id_urzadzenia: str, sensory: SensorModel = Body(...)):
+    print(f"id_urzadzenia {id_urzadzenia}")
+    urzadzenia = db_miernik.urzadzenia.find_one({"_id": ObjectId(id_urzadzenia)})
+    print(urzadzenia)
+    if urzadzenia is not None:
+        if hasattr(sensory, "id"):
+            delattr(sensory, "id")
+        sensory.urzadzenie_id=id_urzadzenia
+        db_miernik.sensory.insert_one(sensory.dict(by_alias=True))
+        sensory = jsonable_encoder(sensory)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=sensory)
+    else:
+        raise HTTPException(status_code=404, detail=f"urządzenie o id:{id_urzadzenia} nie znaleziono!")
+
+
 @app.get("/sensor/", response_description="Zwróć wszystkie sensory")
 async def get_sensor():
     sensory_zbior = []
@@ -34,6 +50,7 @@ async def get_sensor():
 
 @app.get("/sensor/{id}", response_description="Zwróć wszystkie sensory")
 async def pokaz_sensor(id: str):
+    print(db_miernik["sensory"])
     if(sensory := db_miernik["sensory"].find_one({"_id": id})) is not None:
         return sensory
     raise HTTPException(status_code=404, detail=f"Sensory {id} nie znaleziono")
