@@ -16,26 +16,26 @@ app = FastAPI()
 
 
 @app.post("/sensor/", response_description="Stworz sensor", response_model=SensorModel)
-async def create_sensor(sensory: SensorModel = Body(...)):
-    if hasattr(sensory, "id"):
-        delattr(sensory, "id")
-    db_miernik.sensory.insert_one(sensory.dict(by_alias=True))
-    sensory = jsonable_encoder(sensory)
+async def create_sensor(sensor: SensorModel = Body(...)):
+    if hasattr(sensor, "id"):
+        delattr(sensor, "id")
+    db_miernik.sensory.insert_one(sensor.dict(by_alias=True))
+    sensory = jsonable_encoder(sensor)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=sensory)
 
 
 @app.post("/sensor/{id}", response_description="Stwórz sensor, podlaczajac go pod urzadzenie", response_model=SensorModel)
-async def create_sensor(id_urzadzenia: str, sensory: SensorModel = Body(...)):
+async def create_sensor(id_urzadzenia: str, sensor: SensorModel = Body(...)):
     print(f"id_urzadzenia {id_urzadzenia}")
     urzadzenia = db_miernik.urzadzenia.find_one({"_id": ObjectId(id_urzadzenia)})
     print(urzadzenia)
     if urzadzenia is not None:
-        if hasattr(sensory, "id"):
-            delattr(sensory, "id")
-        sensory.urzadzenie_id=id_urzadzenia
-        db_miernik.sensory.insert_one(sensory.dict(by_alias=True))
-        sensory = jsonable_encoder(sensory)
-        return JSONResponse(status_code=status.HTTP_201_CREATED, content=sensory)
+        if hasattr(sensor, "id"):
+            delattr(sensor, "id")
+        sensor.urzadzenie_id=id_urzadzenia
+        db_miernik.sensory.insert_one(sensor.dict(by_alias=True))
+        sensor = jsonable_encoder(sensor)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=sensor)
     else:
         raise HTTPException(status_code=404, detail=f"urządzenie o id:{id_urzadzenia} nie znaleziono!")
 
@@ -49,7 +49,7 @@ async def get_sensor():
 
 
 @app.get("/sensor/{id}", response_description="Zwróć wszystkie sensory")
-async def pokaz_sensor(id: str):
+async def get_sensor_id(id: str):
     print(db_miernik["sensory"])
     if(sensory := db_miernik["sensory"].find_one({"_id": id})) is not None:
         return sensory
@@ -71,12 +71,12 @@ async def drop_sensor():
 
 
 @app.post("/urzadzenie/", response_description="Stwórz urządzenia", response_model=UrzadzenieModel)
-async def create_urzadzenia(urzadzenia: UrzadzenieModel = Body(...)):
-    if hasattr(urzadzenia, "id"):
-        delattr(urzadzenia, "id")
-    db_miernik.urzadzenia.insert_one(urzadzenia.dict(by_alias=True))
-    urzadzenia = jsonable_encoder(urzadzenia)
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=urzadzenia)
+async def create_urzadzenia(urzadzenie: UrzadzenieModel = Body(...)):
+    if hasattr(urzadzenie, "id"):
+        delattr(urzadzenie, "id")
+    db_miernik.urzadzenia.insert_one(urzadzenie.dict(by_alias=True))
+    urzadzenie = jsonable_encoder(urzadzenie)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=urzadzenie)
 
 
 @app.get('/urzadzenie/', response_description="Zwróc wszystkie urzadzenia")
@@ -88,10 +88,10 @@ async def get_urzadzenie():
 
 
 @app.get("/urzadzenie/{id}", response_description="Zwroc jedno urzadzenie")
-async def pokaz_urzadzenie(id: str):
+async def get_urzadzenie_id(id: str):
     if (urzadzenia := db_miernik["urzadzenia"].find_one({"_id": id})) is not None:
         return urzadzenia
-    raise HTTPException(status_code=404, detail=f"Urządzenia {id} nie znaleziono")
+    raise HTTPException(status_code=404, detail=f"Urządzenia o id: {id} nie znaleziono")
 
 
 @app.delete("/delete_urzadzenie/{id}", response_description="Usuń urzadzenie")
@@ -111,7 +111,6 @@ async def drop_urzadzenia():
 @app.post("/sesja/", response_description="Stworz sesje", response_model=SesjaModel)
 async def create_sesja(id_uzytkownika: str, sesja: SesjaModel = Body(...)):
     print(f"id_usera {id_uzytkownika}")
-
     now = datetime.now()
     print("now =", now)
     dt_string = now.strftime("%d/%m/%y %H:%M:%S")
@@ -162,9 +161,7 @@ async def drop_sesje():
 async def create_wektor_probek(wektor_probek: Wektor_ProbekModel = Body(...)):
     if hasattr(wektor_probek, 'id'):
         delattr(wektor_probek, 'id')
-    ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
-    wektor_probek.id = ret.inserted_id
-    print(f"rozpoczecie {wektor_probek}")
+    db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
     wektor_probek = jsonable_encoder(wektor_probek)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
 
@@ -178,7 +175,7 @@ async def create_wektor_probek(id_sesji: str, wektor_probek: Wektor_ProbekModel 
     if sesje is not None:
         if hasattr(wektor_probek, "id"):
             delattr(wektor_probek, "id")
-        wektor_probek.id_sesji=id_sesji
+        wektor_probek.id_sesji = id_sesji
         db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
         wektor_probek = jsonable_encoder(wektor_probek)
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
@@ -195,11 +192,7 @@ async def get_wektory_probek():
 
 
 @app.get("/wektor_probek/{id}", response_description="Zwroc jedna probke")#, response_model=Wektor_Probek)
-async def pokaz_wektor_probek(id: str):
-    mycol = db_miernik['wektory_probek']
-    for x in db_miernik['wektory_probek'].find():
-        print(x)
-
+async def get_wektor_probek_id(id: str):
     if (wektor_probek := db_miernik["wektory_probek"].find_one({"_id": id})) is not None: #usuwam await przez db_miernik
         return wektor_probek
     raise HTTPException(status_code=404, detail=f"Wektor probek {id} nie znaleziono")
@@ -210,7 +203,7 @@ async def delete_wektor_probek(id: str):
     delete_result = db_miernik["wektory_probek"].delete_one({"_id": id})
     if delete_result.deleted_count == 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status_code=403, detail=f"Wektora próbek {id} nie znaleziono")
+    raise HTTPException(status_code=404, detail=f"Wektora próbek {id} nie znaleziono")
 
 
 @app.delete("/drop_wektory_probek/", response_description="drop wektor_probek")#, response_model=Wektor_Probek)
@@ -223,7 +216,7 @@ async def drop_wektory_probek():
 async def create_uzytkownik(uzytkownik: UzytkownikModel):
     if hasattr(uzytkownik, 'id'):
         delattr(uzytkownik, 'id')
-    ret = db_miernik.uzytkownicy.insert_one(uzytkownik.dict(by_alias=True))
+    db_miernik.uzytkownicy.insert_one(uzytkownik.dict(by_alias=True))
     uzytkownik.id = ret.inserted_id
     return {'uzytkownik': uzytkownik}
 
