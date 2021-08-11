@@ -89,6 +89,38 @@ class SesjaModel(BaseModel):
         }
 
 
+class UrzadzenieModel(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    nazwa_urzadzenia: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "nazwa_urzadzenia": "str"
+            }
+        }
+
+
+class SensorModel(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    nazwa_sensora: str
+    badany_parametr: str
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "nazwa_sensora": "str",
+                "badany_parametr": "str"
+            }
+        }
+
+
 class StudentModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     name: str #= Field(...)

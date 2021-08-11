@@ -5,22 +5,90 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 import generateData
-from models_miernik import UserModel, db_miernik, StudentModel, UpdateStudentModel, Wektor_ProbekModel
+from models_miernik import UserModel, db_miernik, StudentModel, \
+    UpdateStudentModel, Wektor_ProbekModel, UrzadzenieModel, SensorModel
 from models_miernik import SesjaModel
 from bson import ObjectId
 from datetime import datetime
 
 
-###### przyklad czasu
-##datetime object containing current date and time
-#now = datetime.now()
-#print("now =", now)
-## dd/mm/yy H:M:S
-#dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-#print("date and time =", dt_string)
-
-
 app = FastAPI()
+
+
+@app.post("/sensor/", response_description="Stworz sensor", response_model=SensorModel)
+async def create_sensor(sensory: SensorModel = Body(...)):
+    if hasattr(sensory, "id"):
+        delattr(sensory, "id")
+    db_miernik.sensory.insert_one(sensory.dict(by_alias=True))
+    sensory = jsonable_encoder(sensory)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=sensory)
+
+
+@app.get("/sensor/", response_description="Zwróć wszystkie sensory")
+async def get_sensor():
+    sensory_zbior = []
+    for sensor in db_miernik.sensory.find():
+        sensory_zbior.append(SensorModel(**sensor))
+    return {"sensory": sensory_zbior}
+
+
+@app.get("/sensor/{id}", response_description="Zwróć wszystkie sensory")
+async def pokaz_sensor(id: str):
+    if(sensory := db_miernik["sensory"].find_one({"_id": id})) is not None:
+        return sensory
+    raise HTTPException(status_code=404, detail=f"Sensory {id} nie znaleziono")
+
+
+@app.delete("/delete_sensor/{id}", response_description="Usuń sensor")
+async def delete_sensor(id: str):
+    delete_result = db_miernik["sensory"].delete_one({"_id": id})
+    if delete_result.deleted_count == 1:
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+    raise HTTPException(status_code=403, detail=f"Sensora {id} nie znaleziono")
+
+
+@app.delete("/drop_sensor/", response_description="drop sensory")
+async def drop_sensor():
+    db_miernik['sensory'].drop()
+    return HTTPException(status_code=404, detail=f"Kolekcji sensory nie można wyczyścić")
+
+
+@app.post("/urzadzenie/", response_description="Stwórz urządzenia", response_model=UrzadzenieModel)
+async def create_urzadzenia(urzadzenia: UrzadzenieModel = Body(...)):
+    if hasattr(urzadzenia, "id"):
+        delattr(urzadzenia, "id")
+    db_miernik.urzadzenia.insert_one(urzadzenia.dict(by_alias=True))
+    urzadzenia = jsonable_encoder(urzadzenia)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=urzadzenia)
+
+
+@app.get('/urzadzenie/', response_description="Zwróc wszystkie urzadzenia")
+async def get_urzadzenie():
+    urzadzenia_zbior = []
+    for urzadzenie in db_miernik.urzadzenia.find():
+        urzadzenia_zbior.append(UrzadzenieModel(**urzadzenie))
+    return {"urzadzenia": urzadzenia_zbior}
+
+
+@app.get("/urzadzenie/{id}", response_description="Zwroc jedno urzadzenie")
+async def pokaz_urzadzenie(id: str):
+    if (urzadzenia := db_miernik["urzadzenia"].find_one({"_id": id})) is not None:
+        return urzadzenia
+    raise HTTPException(status_code=404, detail=f"Urządzenia {id} nie znaleziono")
+
+
+@app.delete("/delete_urzadzenie/{id}", response_description="Usuń urzadzenie")
+async def delete_urzadzenie(id: str):
+    delete_result = db_miernik["urzadzenia"].delete_one({"_id": id})
+    if delete_result.deleted_count == 1:
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+    raise HTTPException(status_code=403, detail=f"Urzadzenie {id} nie znaleziono")
+
+
+@app.delete("/drop_urzadzenie/", response_description="drop urzadzenia")
+async def drop_urzadzenia():
+    db_miernik['urzadzenia'].drop()
+    return HTTPException(status_code=404, detail=f"Kolekcji urzadzeń nie można wyczyścić")
 
 
 @app.post("/sesja/", response_description="Stworz sesje", response_model=SesjaModel)
