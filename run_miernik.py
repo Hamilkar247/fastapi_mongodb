@@ -2,7 +2,7 @@ from fastapi import FastAPI, Body, HTTPException
 from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
-from models_miernik import UserModel, db_miernik, StudentModel, UpdateStudentModel, Wektor_ProbekModel
+from models_miernik import UzytkownikModel, db_miernik, StudentModel, UpdateStudentModel, Wektor_ProbekModel
 from models_miernik import SesjaModel
 from datetime import datetime
 
@@ -17,128 +17,6 @@ from datetime import datetime
 
 
 app = FastAPI()
-
-
-@app.post("/sesja/", response_description="Stworz sesje", response_model=SesjaModel)
-async def create_sesja(sesja: SesjaModel = Body(...)):
-    now = datetime.now()
-    print("now =", now)
-    dt_string = now.strftime("%d/%m/%y %H:%M:%S")
-    print(f"date and time = {dt_string}")
-    print(f"rozpoczecia : {sesja}")
-    if hasattr(sesja, 'id'):
-       delattr(sesja, 'id')
-    sesja.start_sesji = dt_string
-    sesja.koniec_sesji = "nie zakonczona"
-    print(f"{sesja}")
-    #wrzucamy do bazy danych wraz z wygenerowanym kluczem
-    db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
-    sesja = jsonable_encoder(sesja)
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
-
-
-@app.get('/sesja/', response_description="Zwroc wszystkie sesje")
-async def get_sesje():
-    sesje_zbior = []
-    for sesja in db_miernik.sesje.find():
-        sesje_zbior.append(SesjaModel(**sesja))
-    return {"sesje": sesje_zbior}
-
-
-@app.get("/sesja/{id}", response_description="Zwroc jedna sesje")
-async def pokaz_sesje(id: str):
-    if (sesja := db_miernik['sesje'].find_one({"_id": id})) is not None:
-        return sesja
-    raise HTTPException(status_code=404, detail=f"Sesji {id} nie znaleziono")
-
-
-@app.delete("/delete_sesja/{id}", response_description="Usuń sesje")
-async def delete_sesja(id: str):
-    delete_result = db_miernik["sesje"].delete_one({"_id": id})
-    if delete_result.deleted_count == 1:
-        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status_code=403, detail=f"Sesje {id} nie znaleziono")
-
-
-@app.delete("/drop_sesje/", response_description="drop sesje")#, response_model=Wektor_Probek)
-async def drop_sesje():
-    db_miernik['sesje'].drop()
-    return HTTPException(status_code=404, detail=f"Kolekcje sesji nie możesz wyczyścić")
-
-
-@app.post("/wektor_probek/", response_description="Stworz wektor probek", response_model=Wektor_ProbekModel)
-async def create_wektor_probek(wektor_probek: Wektor_ProbekModel = Body(...)):
-    print(f"rozpoczecie {wektor_probek}")
-    if hasattr(wektor_probek, 'id'):
-        delattr(wektor_probek, 'id')
-    ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
-    wektor_probek.id = ret.inserted_id
-    print(f"rozpoczecie {wektor_probek}")
-    wektor_probek = jsonable_encoder(wektor_probek)
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=wektor_probek)
-
-
-    #wektor_probek = jsonable_encoder(wektor_probek)
-    #new_wektor_probek = db_miernik["wektory_probek"].insert_one(wektor_probek)
-    #created_student = db_miernik["wektory_probek"].find_one({"_id": new_wektor_probek.inserted_id})
-    #print(created_student)
-    #return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_student)
-
-    #if hasattr(wektor_probek, 'id'):
-    #    delattr(wektor_probek, 'id')
-    #ret = db_miernik.wektory_probek.insert_one(wektor_probek.dict(by_alias=True))
-    #wektor_probek.id = ret.inserted_id
-    #return {'wektor_probek': wektor_probek}
-
-
-@app.get('/wektor_probek/', response_description="Zwroc wszystkie wektory probek")
-async def get_wektory_probek():
-    wektory_probek = []
-    for wektor_probek in db_miernik.wektory_probek.find():
-        wektory_probek.append(Wektor_ProbekModel(**wektor_probek))
-    return {'wektory_probek': wektory_probek}
-
-
-@app.get("/wektor_probek/{id}", response_description="Zwroc jedna probke")#, response_model=Wektor_Probek)
-async def pokaz_wektor_probek(id: str):
-    mycol = db_miernik['wektory_probek']
-    for x in db_miernik['wektory_probek'].find():
-        print(x)
-
-    if (wektor_probek := db_miernik["wektory_probek"].find_one({"_id": id})) is not None: #usuwam await przez db_miernik
-        return wektor_probek
-    raise HTTPException(status_code=404, detail=f"Wektor probek {id} nie znaleziono")
-
-
-@app.delete("/delete_wektor_probek/{id}", response_description="Usuń wektor probek")
-async def delete_wektor_probek(id: str):
-    delete_result = db_miernik["wektory_probek"].delete_one({"_id": id})
-    if delete_result.deleted_count == 1:
-        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status_code=403, detail=f"Wektora próbek {id} nie znaleziono")
-
-
-@app.delete("/drop_wektory_probek/", response_description="drop wektor_probek")#, response_model=Wektor_Probek)
-async def drop_wektory_probek():
-    db_miernik['wektory_probek'].drop()
-    return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
-
-
-@app.post('/user/')
-async def create_user(user: UserModel):
-    if hasattr(user, 'id'):
-        delattr(user, 'id')
-    ret = db_miernik.users.insert_one(user.dict(by_alias=True))
-    user.id = ret.inserted_id
-    return {'user': user}
-
-
-@app.get('/user/')
-async def get_users():
-    users = []
-    for user in db_miernik.users.find():
-        users.append(UserModel(**user))
-    return {'users': users}
 
 
 @app.post("/create_student/", response_description="Add new student", response_model=StudentModel)
