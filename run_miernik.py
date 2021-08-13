@@ -1,13 +1,9 @@
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.encoders import jsonable_encoder
-from pydantic.typing import List
 from starlette import status
 from starlette.responses import JSONResponse
-
-import generateData
 from models_miernik import UserModel, db_miernik, StudentModel, UpdateStudentModel, Wektor_ProbekModel
 from models_miernik import SesjaModel
-from bson import ObjectId
 from datetime import datetime
 
 
