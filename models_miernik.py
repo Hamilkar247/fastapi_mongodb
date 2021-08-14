@@ -7,11 +7,11 @@ client = MongoClient("mongodb://localhost:27017")
 db_miernik = client["miernik"]
 print(client.list_database_names())
 print(db_miernik.list_collection_names())
-print(db_miernik["sesje"])
+print(db_miernik["zbior_sesji"])
 #if "sesje" in db_miernik:
 #    print("baza danych już istnieje")
 #    print(db_miernik['sesje'])
-mycol = db_miernik["sesje"]
+mycol = db_miernik["zbior_sesji"]
 for x in mycol.find():
     print(x)
 

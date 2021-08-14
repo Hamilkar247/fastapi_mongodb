@@ -16,6 +16,27 @@ router = APIRouter(
 )
 
 
+@router.post("/", response_description="Stworz sesje", response_model=SesjaModel)
+async def create_sesja(sesja: SesjaModel = Body(...)):
+    now = datetime.now()
+    print("now =", now)
+    dt_string = now.strftime("%d/%m/%y %H:%M:%S")
+    print(f"date and time = {dt_string}")
+    print(f"rozpoczecia : {sesja}")
+
+    if hasattr(sesja, 'id'):
+       delattr(sesja, 'id')
+    sesja.czy_aktywna = "true"
+    sesja.dlugosc_trwania = "trwa - dlugosc nieustalona"
+    sesja.start_sesji = dt_string
+    sesja.koniec_sesji = "nie zakonczona"
+    print(f"{sesja}")
+    #wrzucamy do bazy danych wraz z wygenerowanym kluczem
+    db_miernik.zbior_sesji.insert_one(sesja.dict(by_alias=True))
+    sesja = jsonable_encoder(sesja)
+    return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+
+
 @router.post("/{id_urzadzenie}", response_description="Stworz sesje", response_model=SesjaModel)
 async def create_sesja(id_urzadzenie: str, sesja: SesjaModel = Body(...)):
     now = datetime.now()
@@ -25,13 +46,14 @@ async def create_sesja(id_urzadzenie: str, sesja: SesjaModel = Body(...)):
     print(f"rozpoczecia : {sesja}")
     print(f"id_urzadzenie: "+id_urzadzenie)
 
-    urzadzenie_result = db_miernik.zbior_urzadzen.find_one(id_urzadzenie)
+    urzadzenie_result = db_miernik.zbior_urzadzen.find_one(ObjectId(id_urzadzenie))
     if urzadzenie_result is None:
-        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+        print("Nie znaleziono urzadzenia w zbiorze")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Nie znaleziono urządzenia o tym id")
     else:
         if hasattr(sesja, 'id'):
            delattr(sesja, 'id')
-        sesja.id_urzadzenia = ObjectId(id_urzadzenie)
+        sesja.id_urzadzenia = id_urzadzenie
         sesja.czy_aktywna = "true"
         sesja.dlugosc_trwania = "trwa - dlugosc nieustalona"
         sesja.start_sesji = dt_string
@@ -41,21 +63,20 @@ async def create_sesja(id_urzadzenie: str, sesja: SesjaModel = Body(...)):
         db_miernik.zbior_sesji.insert_one(sesja.dict(by_alias=True))
         sesja = jsonable_encoder(sesja)
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
-    print("Nie znaleziono urzadzenia w zbiorze")
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Nie znaleziono urządzenia o tym id")
 
 
 @router.get('/', response_description="Zwroc wszystkie sesje")
 async def get_sesje():
-    zbior_sesji = []
+    sesja_zbior = []
     for sesja in db_miernik.zbior_sesji.find():
-        zbior_sesji.append(SesjaModel(**sesja))
-    return {"zbior_sesji": zbior_sesji}
+        print(sesja)
+        sesja_zbior.append(SesjaModel(**sesja))
+    return {"sesja_zbior": sesja_zbior}
 
 
 @router.get("/{id}", response_description="Zwroc jedna sesje")
 async def get_id_sesje(id: str):
-    if (sesja := db_miernik.zbior_sesji.find_one({"_id": id})) is not None:
+    if (sesja := db_miernik.zbior_sesji.find_one({"_id": ObjectId(id)})) is not None:
         return sesja
     raise HTTPException(status_code=404, detail=f"Sesji {id} nie znaleziono")
 
