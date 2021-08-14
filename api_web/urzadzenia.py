@@ -16,7 +16,7 @@ async def create_urzadzenia(urzadzenie: UrzadzeniaModel = Body(...)):
     print(f"rozpoczecie {urzadzenie}")
     if hasattr(urzadzenie, "id"):
         delattr(urzadzenie, "id")
-    ret = db_miernik.urzadzenia.insert_one(urzadzenie.dict(by_alias=True))
+    ret = db_miernik.zbior_urzadzen.insert_one(urzadzenie.dict(by_alias=True))
     urzadzenie.id = ret.inserted_id
     print(f"rozpoczecie {urzadzenie}")
     urzadzenie = jsonable_encoder(urzadzenie)
@@ -26,21 +26,21 @@ async def create_urzadzenia(urzadzenie: UrzadzeniaModel = Body(...)):
 @router.get('/', response_description="Zwróć wszystkie urządzenia")
 async def get_urzadzenia():
     urzadzenia_zbior = []
-    for urzadzenie in db_miernik.urzadzenia.find():
+    for urzadzenie in db_miernik.zbior_urzadzen.find():
         urzadzenia_zbior.append(UrzadzeniaModel(**urzadzenie))
     return {"urzadzenia": urzadzenia_zbior}
 
 
 @router.get("/{id}", response_description="Zwroc jedna paczke danych")
 async def get_urzadzenie(id: str):
-    if (urzadzenia := db_miernik["urzadzenia"].find_one({"_id": id})) is not None:
+    if (urzadzenia := db_miernik.zbior_urzadzen.find_one({"_id": id})) is not None:
         return urzadzenia
     raise HTTPException(status_code=404, detail=f"Paczki danych o {id} nie znaleziono")
 
 
 @router.delete("/delete/{id}", response_description="Usuń paczki danych")
 async def delete_urzadzenia(id: str):
-    delete_result = db_miernik["urzadzenia"].delete_one({"_id": id})
+    delete_result = db_miernik.zbior_urzadzen.delete_one({"_id": id})
     if delete_result.deleted_count == 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
     elif delete_result.deleted_count > 1:
@@ -50,6 +50,6 @@ async def delete_urzadzenia(id: str):
 
 @router.delete("/drop_urzadzenia", response_description="drop urzadzenia")
 async def drop_urzadzenia():
-    db_miernik["urzadzenia"].drop()
+    db_miernik.zbior_urzadzen.drop()
     #tu wypadaloby dać jakiś return - nie mam pomyslu jaki
     raise HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")

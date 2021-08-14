@@ -25,7 +25,7 @@ async def create_sesja(id_urzadzenie: str, sesja: SesjaModel = Body(...)):
     print(f"rozpoczecia : {sesja}")
     print(f"id_urzadzenie: "+id_urzadzenie)
 
-    urzadzenie_result = db_miernik.urzadzenia.find_one(id_urzadzenie)
+    urzadzenie_result = db_miernik.zbior_urzadzen.find_one(id_urzadzenie)
     if urzadzenie_result is None:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
     else:
@@ -38,32 +38,31 @@ async def create_sesja(id_urzadzenie: str, sesja: SesjaModel = Body(...)):
         sesja.koniec_sesji = "nie zakonczona"
         print(f"{sesja}")
         #wrzucamy do bazy danych wraz z wygenerowanym kluczem
-        db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
+        db_miernik.zbior_sesji.insert_one(sesja.dict(by_alias=True))
         sesja = jsonable_encoder(sesja)
-    else:
-        print("Nie znaleziono urzadzenia w zbiorze")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Nie znaleziono urządzenia o tym id")
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+    print("Nie znaleziono urzadzenia w zbiorze")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Nie znaleziono urządzenia o tym id")
 
 
 @router.get('/', response_description="Zwroc wszystkie sesje")
 async def get_sesje():
-    sesje_zbior = []
-    for sesja in db_miernik.sesje.find():
-        sesje_zbior.append(SesjaModel(**sesja))
-    return {"sesje": sesje_zbior}
+    zbior_sesji = []
+    for sesja in db_miernik.zbior_sesji.find():
+        zbior_sesji.append(SesjaModel(**sesja))
+    return {"zbior_sesji": zbior_sesji}
 
 
 @router.get("/{id}", response_description="Zwroc jedna sesje")
 async def get_id_sesje(id: str):
-    if (sesja := db_miernik['sesje'].find_one({"_id": id})) is not None:
+    if (sesja := db_miernik.zbior_sesji.find_one({"_id": id})) is not None:
         return sesja
     raise HTTPException(status_code=404, detail=f"Sesji {id} nie znaleziono")
 
 
 @router.delete("/delete/{id}", response_description="Usuń sesje")
 async def delete_sesja(id: str):
-    delete_result = db_miernik["sesje"].delete_one({"_id": id})
+    delete_result = db_miernik.zbior_sesji.delete_one({"_id": id})
     if delete_result.deleted_count == 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
     raise HTTPException(status_code=403, detail=f"Sesje {id} nie znaleziono")
@@ -71,5 +70,5 @@ async def delete_sesja(id: str):
 
 @router.delete("/drop_sesje/", response_description="drop sesje")#, response_model=Wektor_Probek)
 async def drop_sesje():
-    db_miernik['sesje'].drop()
+    db_miernik.zbior_sesji.drop()
     return HTTPException(status_code=404, detail=f"Kolekcje sesji nie możesz wyczyścić")

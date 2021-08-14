@@ -16,7 +16,7 @@ async def create_sensor(sensor: SensorModel = Body(...)):
     print(f"rozpoczecie {sensor}")
     if hasattr(sensor, 'id'):
         delattr(sensor, 'id')
-    ret = db_miernik.sensor.insert_one(sensor.dict(by_alias=True))
+    ret = db_miernik.zbior_sensorow.insert_one(sensor.dict(by_alias=True))
     sensor.id = ret.inserted_id
     print(f"rozpoczecie {sensor}")
     sensor = jsonable_encoder(sensor)
@@ -25,30 +25,30 @@ async def create_sensor(sensor: SensorModel = Body(...)):
 
 @router.get('/', response_description="Zwroc wszystkie sensor")
 async def get_sensor():
-    sensory = []
-    for sensor in db_miernik.sensor.find():
-        sensory.append(SensorModel(**sensory))
-    return {'sensory': sensory}
+    sensory_zbior = []
+    for sensor in db_miernik.zbior_sensorow.find():
+        sensory_zbior.append(SensorModel(**sensory_zbior))
+    return {'sensory': sensory_zbior}
 
 
 @router.get("/{id}", response_description="Zwroc jeden sensor")#, response_model=Wektor_Probek)
 async def get_sensor_po_id(id: str):
-    if (sensor := db_miernik["sensory"].find_one({"_id": id})) is not None: #usuwam await przez db_miernik
+    if (sensor := db_miernik.zbior_sensorow.find_one({"_id": id})) is not None: #usuwam await przez db_miernik
         return sensor
     raise HTTPException(status_code=404, detail=f"Sensor o {id} nie znaleziono")
 
 
-@router.delete("/delete/{id}", response_description="Usuń paczki danych")
-async def delete_paczki_danych(id: str):
+@router.delete("/delete/{id}", response_description="Usuń sensor")
+async def delete_sensor(id: str):
     ## DO DODANIA - do zastanowienia sie czy to powinno być usuniecie kaskadowa
-    delete_result = db_miernik["paczki_danych"].delete_one({"_id": id})
+    delete_result = db_miernik.zbior_sensorow.delete_one({"_id": id})
     if delete_result.deleted_count == 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status_code=403, detail=f"Paczki danych o {id} nie znaleziono")
+    raise HTTPException(status_code=403, detail=f"Sensora o {id} nie znaleziono")
 
 
-@router.delete("/drop_paczki_danych/", response_description="drop paczki danych")#, response_model=Wektor_Probek)
+@router.delete("/drop_paczki_danych/", response_description="drop sensor")#, response_model=Wektor_Probek)
 async def drop_paczki_danych():
-    db_miernik['paczki_danych'].drop()
+    db_miernik.zbior_sensorow.drop()
     return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
 
