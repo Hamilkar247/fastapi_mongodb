@@ -72,8 +72,9 @@ class SesjaModel(BaseModel):
     nazwa_sesji: str
     start_sesji: Optional[str]
     koniec_sesji: Optional[str]
-    czy_aktywna: str      #czy dopisujemy do paczel
-    dlugosc_trwania: str
+    czy_aktywna: Optional[str]  #czy dopisujemy do paczel
+    dlugosc_trwania: Optional[str]
+    id_urzadzenia: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
@@ -82,7 +83,6 @@ class SesjaModel(BaseModel):
         schema_extra = {
             "example": {
                 "nazwa_sesji": "str",
-                "czy_aktywna": "true",
             }
         }
 

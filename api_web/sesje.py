@@ -1,3 +1,4 @@
+from bson import ObjectId
 from fastapi import FastAPI, APIRouter, Body, HTTPException
 from fastapi.encoders import jsonable_encoder
 from starlette import status
@@ -15,21 +16,33 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_description="Stworz sesje", response_model=SesjaModel)
-async def create_sesja(sesja: SesjaModel = Body(...)):
+@router.post("/{id_urzadzenie}", response_description="Stworz sesje", response_model=SesjaModel)
+async def create_sesja(id_urzadzenie: str, sesja: SesjaModel = Body(...)):
     now = datetime.now()
     print("now =", now)
     dt_string = now.strftime("%d/%m/%y %H:%M:%S")
     print(f"date and time = {dt_string}")
     print(f"rozpoczecia : {sesja}")
-    if hasattr(sesja, 'id'):
-       delattr(sesja, 'id')
-    sesja.start_sesji = dt_string
-    sesja.koniec_sesji = "nie zakonczona"
-    print(f"{sesja}")
-    #wrzucamy do bazy danych wraz z wygenerowanym kluczem
-    db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
-    sesja = jsonable_encoder(sesja)
+    print(f"id_urzadzenie: "+id_urzadzenie)
+
+    urzadzenie_result = db_miernik.urzadzenia.find_one(id_urzadzenie)
+    if urzadzenie_result is None:
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+    else:
+        if hasattr(sesja, 'id'):
+           delattr(sesja, 'id')
+        sesja.id_urzadzenia = ObjectId(id_urzadzenie)
+        sesja.czy_aktywna = "true"
+        sesja.dlugosc_trwania = "trwa - dlugosc nieustalona"
+        sesja.start_sesji = dt_string
+        sesja.koniec_sesji = "nie zakonczona"
+        print(f"{sesja}")
+        #wrzucamy do bazy danych wraz z wygenerowanym kluczem
+        db_miernik.sesje.insert_one(sesja.dict(by_alias=True))
+        sesja = jsonable_encoder(sesja)
+    else:
+        print("Nie znaleziono urzadzenia w zbiorze")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Nie znaleziono urządzenia o tym id")
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
 
 
