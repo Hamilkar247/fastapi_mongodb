@@ -1,3 +1,4 @@
+from bson import ObjectId
 from fastapi import FastAPI, Body, HTTPException, APIRouter
 from fastapi.encoders import jsonable_encoder
 from starlette import status
@@ -32,9 +33,12 @@ async def get_sensor():
 
 
 @router.get("/{id}", response_description="Zwroc jeden sensor")#, response_model=Wektor_Probek)
-async def get_sensor_po_id(id: str):
-    if (sensor := db_miernik.zbior_sensorow.find_one({"_id": id})) is not None: #usuwam await przez db_miernik
-        return sensor
+async def get_sensor_id(id: str):
+    sensor = db_miernik.zbior_sensor.find_one({"_id": ObjectId(id)})
+    if sensor is not None:
+        sensor_element = []
+        sensor_element.append(SensorModel(**sensor))
+        return {"sensor_element": sensor_element}
     raise HTTPException(status_code=404, detail=f"Sensor o {id} nie znaleziono")
 
 

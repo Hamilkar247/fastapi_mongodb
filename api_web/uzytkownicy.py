@@ -1,3 +1,4 @@
+from bson import ObjectId
 from fastapi import FastAPI, Body, HTTPException
 from fastapi.encoders import jsonable_encoder
 from starlette import status
@@ -26,8 +27,18 @@ async def create_uzytkownik(uzytkownik: UzytkownikModel):
 
 
 @router.get('/user/')
-async def get_users():
+async def get_uzytkownik():
     zbior_uzytkownikow = []
     for uzytkownik in db_miernik.zbior_uzytkownikow.find():
         zbior_uzytkownikow.append(UzytkownikModel(**uzytkownik))
     return {'uzytkownicy': zbior_uzytkownikow}
+
+
+@router.get("/{id}", response_description="Zwroc jednego użytkownika")#, response_model=Wektor_Probek)
+async def get_uzytkownika_id(id: str):
+    uzytkownik = db_miernik.zbior_uzytkownikow.find_one({"_id": ObjectId(id)})
+    if uzytkownik is not None:
+        uzytkownik_element = []
+        uzytkownik_element.append(UzytkownikModel(**uzytkownik))
+        return {"sensor_element": uzytkownik_element}
+    raise HTTPException(status_code=404, detail=f"Sensor o {id} nie znaleziono")

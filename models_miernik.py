@@ -11,7 +11,7 @@ print(db_miernik["zbior_sesji"])
 #if "sesje" in db_miernik:
 #    print("baza danych już istnieje")
 #    print(db_miernik['sesje'])
-mycol = db_miernik["zbior_sesji"]
+mycol = db_miernik["zbior_urzadzen"]
 for x in mycol.find():
     print(x)
 
