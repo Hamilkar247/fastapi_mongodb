@@ -43,33 +43,36 @@ async def create_sesja_bez_id_urzadzenia(sesja: SesjaModel = Body(...)):
 @router.post("/stworz_sesje/id_urzadzenia={id_urzadzenia}", response_description="Stworz sesje",
              response_model=SesjaModel)
 async def create_sesja(id_urzadzenia: str, sesja: SesjaModel = Body(...)):
-    now = datetime.now()
-    print("now =", now)
-    dt_string = now.strftime("%d/%m/%y %H:%M:%S")
-    print(f"date and time = {dt_string}")
-    print(f"rozpoczecia : {sesja}")
-    print(f"id_urzadzenia: " + id_urzadzenia)
+    try:
+        now = datetime.now()
+        print("now =", now)
+        dt_string = now.strftime("%d/%m/%y %H:%M:%S")
+        print(f"date and time = {dt_string}")
+        print(f"rozpoczecia : {sesja}")
+        print(f"id_urzadzenia: " + id_urzadzenia)
 
-    urzadzenie_result = db_miernik.zbior_urzadzen.find_one(ObjectId(id_urzadzenia))
-    if urzadzenie_result is None:
-        print("Nie znaleziono urzadzenia w zbiorze")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Nie znaleziono urządzenia o tym id")
-    else:
-        if hasattr(sesja, 'id'):
-            delattr(sesja, 'id')
-        sesja.id_urzadzenia = id_urzadzenia
-        sesja.czy_aktywna = "tak"
-        sesja.dlugosc_trwania_w_s = "trwa"
-        sesja.start_sesji = dt_string
-        sesja.koniec_sesji = "nie zakonczona"
-        print(f"{sesja}")
-        # wrzucamy do bazy danych wraz z wygenerowanym kluczem
-        db_miernik.zbior_sesji.insert_one(sesja.dict(by_alias=True))
-        sesja = jsonable_encoder(sesja)
-        return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+        urzadzenie_result = db_miernik.zbior_urzadzen.find_one(ObjectId(id_urzadzenia))
+        if urzadzenie_result is None:
+            print("Nie znaleziono urzadzenia w zbiorze")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Nie znaleziono urządzenia o tym id")
+        else:
+            if hasattr(sesja, 'id'):
+                delattr(sesja, 'id')
+            sesja.id_urzadzenia = id_urzadzenia
+            sesja.czy_aktywna = "tak"
+            sesja.dlugosc_trwania_w_s = "trwa"
+            sesja.start_sesji = dt_string
+            sesja.koniec_sesji = "nie zakonczona"
+            print(f"{sesja}")
+            # wrzucamy do bazy danych wraz z wygenerowanym kluczem
+            db_miernik.zbior_sesji.insert_one(sesja.dict(by_alias=True))
+            sesja = jsonable_encoder(sesja)
+            return JSONResponse(status_code=status.HTTP_201_CREATED, content=sesja)
+    except bson.errors.InvalidId:
+        raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków")
 
 
-@router.get('/get_zbior_sesji', response_description="Zwroc wszystkie sesje")
+@router.get('/get_zbior_sesji', response_description="Zwróć wszystkie sesje")
 async def get_zbior_sesji():
     sesja_zbior = []
     for sesja in db_miernik.zbior_sesji.find():
@@ -128,6 +131,7 @@ async def zakoncz_sesje(id: str):
             raise HTTPException(status_code=404, detail="nie ma sesji o podanym id!")
     except bson.errors.InvalidId:
         raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków")
+
 
 @router.delete("/delete_sesje/id_sesji={id}", response_description="Usuń sesje")
 async def delete_sesja(id: str):

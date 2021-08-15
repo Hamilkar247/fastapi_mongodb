@@ -51,9 +51,10 @@ class UzytkownikModel(BaseModel):
 
 class PaczkaDanychModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
+    czas_paczki: str
+    wartosci: str
+    napiecie_w_urzadzeniu: str
     id_urzadzenia: Optional[str]
-    wartosci: Optional[str]
-    napiecie_w_urzadzeniu: Optional[str]
 
     class Config:
         allow_population_by_field_name = True

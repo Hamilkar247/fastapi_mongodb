@@ -137,10 +137,10 @@ for x in mydoc:
 
 def def_db_miernik():
     print("--------------")
-    my_result = db_miernik.zbior_sensorow.find()
+    my_result = db_miernik.zbior_paczek_danych.find()
     for x in my_result:
         print(x)
-        #print(x['czy_aktywna'])
+        print(x['napiecie_w_urzadzeniu'])
 
 
 def_db_miernik()
