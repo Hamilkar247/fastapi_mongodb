@@ -107,11 +107,14 @@ class UrzadzeniaModel(BaseModel):
 class SensorModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     parametr: str
-    kalibracja_wspolczynniki: str
+    kalib_wspol_A: str
+    kalib_wspol_B: str
+    min: str
     min: str
     max: str
     jednostka: str
     status_sensora: str
+    id_urzadzenia: Optional[str]
 
     class Config:
         allow_population_by_field_name = True
@@ -120,11 +123,14 @@ class SensorModel(BaseModel):
         schema_extra = {
             "example": {
                 "parametr": "str",
-                "numer_seryjny": "str",
+                "kalib_wspol_A": "1",
+                "kalib_wspol_B": "1",
+                "min": "0",
+                "max": "1",
+                "jednostka": "str",
+                "status_sensora": "aktywny"
             }
         }
-
-
 
 
 class StudentModel(BaseModel):

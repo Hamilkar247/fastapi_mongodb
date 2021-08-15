@@ -137,10 +137,10 @@ for x in mydoc:
 
 def def_db_miernik():
     print("--------------")
-    my_result = db_miernik.zbior_sesji.find()
+    my_result = db_miernik.zbior_sensorow.find()
     for x in my_result:
         print(x)
-        print(x['czy_aktywna'])
+        #print(x['czy_aktywna'])
 
 
 def_db_miernik()
