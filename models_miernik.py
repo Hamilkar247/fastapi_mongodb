@@ -73,7 +73,7 @@ class SesjaModel(BaseModel):
     start_sesji: Optional[str]
     koniec_sesji: Optional[str]
     czy_aktywna: Optional[str]  #czy dopisujemy do paczel
-    dlugosc_trwania: Optional[str]
+    dlugosc_trwania_w_s: Optional[str]
     id_urzadzenia: Optional[str]
 
     class Config:
