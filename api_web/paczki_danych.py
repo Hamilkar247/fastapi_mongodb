@@ -15,9 +15,9 @@ router = APIRouter(
 )
 
 
-@router.post("/stworz_paczke_danych/bez_id_urzadzenia"
-    , response_description="Stwórz paczkę danych"
-    , response_model=PaczkaDanychModel)
+@router.post("/stworz_paczke_danych/bez_id_urzadzenia",
+             response_description="Stwórz paczkę danych",
+             response_model=PaczkaDanychModel)
 async def create_paczke_danych(paczka_danych: PaczkaDanychModel = Body(...)):
     if hasattr(paczka_danych, 'id'):
         delattr(paczka_danych, 'id')
@@ -26,9 +26,9 @@ async def create_paczke_danych(paczka_danych: PaczkaDanychModel = Body(...)):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=paczka_danych)
 
 
-@router.post("/stworz_paczke_danych/id_urzadzenia={id_urzadzenia}"
-    , response_description="Stwórz paczkę danych"
-    , response_model=PaczkaDanychModel)
+@router.post("/stworz_paczke_danych/id_urzadzenia={id_urzadzenia}",
+             response_description="Stwórz paczkę danych",
+             response_model=PaczkaDanychModel)
 async def create_paczke_danych(id_urzadzenia: str, paczka_danych: PaczkaDanychModel = Body(...)):
     try:
         now = datetime.now()
@@ -60,9 +60,15 @@ async def get_paczki_danych():
     return {'zbior_paczek_danych': zbior_paczek_danych}
 
 
-@router.get("/get_paczke_danych/id={id}", response_description="Zwroc jedna paczke danych")#, response_model=Wektor_Probek)
-async def get_id_paczke_danych(id: str):
-    if (paczki_danych := db_miernik.zbior_paczek_danych.find_one({"_id": id})) is not None: #usuwam await przez db_miernik
+@router.get("/get_paczke_danych/id={id}", response_description="Zwróć jedną paczkę danych")#, response_model=Wektor_Probek)
+async def get_paczke_danych_id(id: str):
+    paczka_danych = db_miernik.zbior_paczek_danych.find_one({"_id": ObjectId(id)})
+    if paczka_danych is not None:
+        print(paczka_danych)
+        paczka_danych_element = []
+        paczka_danych_element.append(PaczkaDanychModel(**paczka_danych))
+        return {"paczka_danych_element": paczka_danych_element}
+    if (paczki_danych := db_miernik.zbior_paczek_danych.find_one({"_id": ObjectId(id)})) is not None: #usuwam await przez db_miernik
         return paczki_danych
     raise HTTPException(status_code=404, detail=f"Paczki danych o {id} nie znaleziono")
 
@@ -70,13 +76,13 @@ async def get_id_paczke_danych(id: str):
 @router.delete("/delete_paczke_danych/id_paczki_danych={id}", response_description="Usuń paczki danych")
 async def delete_paczki_danych(id: str):
     ## DO DODANIA - do zastanowienia sie czy to powinno być usuniecie kaskadowa
-    delete_result = db_miernik.zbior_paczek_danych.delete_one({"_id": id})
+    delete_result = db_miernik.zbior_paczek_danych.delete_one({"_id": ObjectId(id)})
     if delete_result.deleted_count == 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
     raise HTTPException(status_code=403, detail=f"Paczki danych o {id} nie znaleziono")
 
 
-@router.delete("/drop_paczki_danych/", response_description="drop paczki danych")#, response_model=Wektor_Probek)
+@router.delete("/drop_paczki_danych", response_description="drop paczki danych")#, response_model=Wektor_Probek)
 async def drop_paczki_danych():
     db_miernik.zbior_paczek_danych.drop()
     return HTTPException(status_code=404, detail=f"Kolekcja paczki danych nie udało się oczyścić")
