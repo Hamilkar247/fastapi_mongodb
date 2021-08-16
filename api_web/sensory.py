@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post("/stworz_sesje/bez_id_urzadzenia", response_description="Stworz sensor", response_model=SensorModel)
+@router.post("/stworz_sensor/bez_id_urzadzenia", response_description="Stworz sensor", response_model=SensorModel)
 async def create_sensor_bez_id_urzadzenia(sensor: SensorModel = Body(...)):
     if hasattr(sensor, 'id'):
         delattr(sensor, 'id')
@@ -24,7 +24,7 @@ async def create_sensor_bez_id_urzadzenia(sensor: SensorModel = Body(...)):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=sensor)
 
 
-@router.post("/stworz_sesje/id_urzadzenia={id_urzadzenia}", response_description="Stwórz sensor", response_model=SensorModel)
+@router.post("/stworz_sensor/id_urzadzenia={id_urzadzenia}", response_description="Stwórz sensor", response_model=SensorModel)
 async def create_sensor(id_urzadzenia: str, sensor: SensorModel = Body(...)):
     try:
         urzadzenie_result = db_miernik.zbior_urzadzen.find_one({"_id": ObjectId(id_urzadzenia)})
@@ -44,8 +44,8 @@ async def create_sensor(id_urzadzenia: str, sensor: SensorModel = Body(...)):
         raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków")
 
 
-@router.get('/', response_description="Zwróć wszystkie sensory")
-async def get_sensor():
+@router.get('/get_sensory', response_description="Zwróć wszystkie sensory")
+async def get_sensory():
     sensory_zbior = []
     for sensor in db_miernik.zbior_sensorow.find():
         sensory_zbior.append(SensorModel(**sensor))
@@ -77,8 +77,8 @@ async def delete_sensor(id: str):
         raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków")
 
 
-@router.delete("/drop_paczki_danych/", response_description="drop sensor")#, response_model=Wektor_Probek)
-async def drop_paczki_danych():
+@router.delete("/drop_sensory", response_description="drop sensor")
+async def drop_sensory():
     db_miernik.zbior_sensorow.drop()
     return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
 

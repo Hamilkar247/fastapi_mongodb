@@ -95,7 +95,7 @@ async def get_sesje_id(id: str):
         raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków")
 
 
-@router.put("/zakoncz_sesje/id={id}", response_description="Zwróć jedną sesję")
+@router.put("/zakoncz_sesje/id={id}", response_description="Zakończ działanie sesji")
 async def zakoncz_sesje(id: str):
     try:
         sesja_find = db_miernik.zbior_sesji.find_one({"_id": ObjectId(id)})
@@ -133,7 +133,7 @@ async def zakoncz_sesje(id: str):
         raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków")
 
 
-@router.delete("/delete_sesje/id_sesji={id}", response_description="Usuń sesje")
+@router.delete("/delete_sesje/id={id}", response_description="Usuń sesje")
 async def delete_sesja(id: str):
     delete_result = db_miernik.zbior_sesji.delete_one({"_id": id})
     if delete_result.deleted_count == 1:
@@ -141,7 +141,7 @@ async def delete_sesja(id: str):
     raise HTTPException(status_code=403, detail=f"Sesje {id} nie znaleziono")
 
 
-@router.delete("/drop_zbior_sesji/", response_description="drop sesje")  # , response_model=Wektor_Probek)
+@router.delete("/drop_zbior_sesji", response_description="drop sesje")  # , response_model=Wektor_Probek)
 async def drop_sesje():
     db_miernik.zbior_sesji.drop()
     return HTTPException(status_code=404, detail=f"Kolekcje sesji nie możesz wyczyścić")

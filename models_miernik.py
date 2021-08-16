@@ -51,9 +51,10 @@ class UzytkownikModel(BaseModel):
 
 class PaczkaDanychModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
-    czas_paczki: str
-    wartosci: str
-    napiecie_w_urzadzeniu: str
+    czas_paczki: Optional[str]
+    #wartosci: str #encja - wartosci pomiaru
+    kod_statusu: str
+    numer_seryjny: str
     id_urzadzenia: Optional[str]
 
     class Config:
@@ -62,8 +63,26 @@ class PaczkaDanychModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
-                "wartosci": "str, str, str",
-                "napiecie_w_urzadzeniu": "str",
+                "numer_seryjny": "str",
+                "kod_statusu": "00000000"
+            }
+        }
+
+
+class WartoscPomiaruSensora(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id")
+    wartosc: str
+    litera: str
+    id_paczki_danych: Optional[str]
+
+    class Config:
+        allow_population_by_field_name = True
+        arbritrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "wartosc": 3,
+                "litera": "str"
             }
         }
 
@@ -107,10 +126,9 @@ class UrzadzeniaModel(BaseModel):
 
 class SensorModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
+    litera_porzadkowa: str
     parametr: str
-    kalib_wspol_A: str
-    kalib_wspol_B: str
-    min: str
+    kalib_wspol: str
     min: str
     max: str
     jednostka: str
@@ -123,11 +141,11 @@ class SensorModel(BaseModel):
         json_encoders = {ObjectId: str}
         schema_extra = {
             "example": {
+                "litera_porzadkowa": "str",
                 "parametr": "str",
-                "kalib_wspol_A": "1",
-                "kalib_wspol_B": "1",
+                "kalib_wspol": "1;0",
                 "min": "0",
-                "max": "1",
+                "max": "10",
                 "jednostka": "str",
                 "status_sensora": "aktywny"
             }

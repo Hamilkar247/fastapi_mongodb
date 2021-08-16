@@ -6,7 +6,7 @@ from fastapi import FastAPI, Body, HTTPException, APIRouter
 from fastapi.encoders import jsonable_encoder
 from starlette import status
 from starlette.responses import JSONResponse
-from models_miernik import  db_miernik, PaczkaDanychModel
+from models_miernik import db_miernik, PaczkaDanychModel
 
 router = APIRouter(
     prefix="/paczki_danych",
@@ -79,5 +79,5 @@ async def delete_paczki_danych(id: str):
 @router.delete("/drop_paczki_danych/", response_description="drop paczki danych")#, response_model=Wektor_Probek)
 async def drop_paczki_danych():
     db_miernik.zbior_paczek_danych.drop()
-    return HTTPException(status_code=404, detail=f"Kolekcja wektorów próbek nie możesz wyczyścić")
+    return HTTPException(status_code=404, detail=f"Kolekcja paczki danych nie udało się oczyścić")
 
