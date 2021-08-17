@@ -7,11 +7,26 @@ client = MongoClient("mongodb://localhost:27017")
 db_miernik = client["miernik"]
 print(client.list_database_names())
 print(db_miernik.list_collection_names())
-print(db_miernik["zbior_sesji"])
+print(f"ahoj! {db_miernik['zbior_dokumentow_sesji']}")
 #if "sesje" in db_miernik:
 #    print("baza danych już istnieje")
 #    print(db_miernik['sesje'])
-mycol = db_miernik["zbior_urzadzen"]
+
+record = {
+  "nazwa_sesji": "str",
+  "start_sesji": "17/08/21 15:12:22",
+  "koniec_sesji": "nie zakonczona",
+  "czy_aktywna": "true",
+  "dlugosc_trwania_w_s": "trwa - dlugosc nieustalona",
+  "id_urzadzenia": "str",
+  "id_uzytkownika": "str",
+  "paczki_danych": "str"
+}
+
+mycol = db_miernik["zbior_dokumentow_sesji"]
+x = mycol.insert_one(record)
+print(x)
+
 for x in mycol.find():
     print(x)
 
