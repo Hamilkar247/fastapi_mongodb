@@ -1,4 +1,5 @@
 import pymongo
+from models_miernik import db_miernik
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017")
 mydb = myclient["mydatebase"]
@@ -6,21 +7,21 @@ mycol = mydb["customers"]
 
 print(mydb.list_collection_names())
 
-#mydict = { "name" : "Erich", "address" : "11 September" }
+# mydict = { "name" : "Erich", "address" : "11 September" }
 
 mylist = [
-  { "name": "Amy", "address": "Apple st 652"},
-  { "name": "Hannah", "address": "Mountain 21"},
-  { "name": "Michael", "address": "Valley 345"},
-  { "name": "Sandy", "address": "Ocean blvd 2"},
-  { "name": "Betty", "address": "Green Grass 1"},
-  { "name": "Richard", "address": "Sky st 331"},
-  { "name": "Susan", "address": "One way 98"},
-  { "name": "Vicky", "address": "Yellow Garden 2"},
-  { "name": "Ben", "address": "Park Lane 38"},
-  { "name": "William", "address": "Central st 954"},
-  { "name": "Chuck", "address": "Main Road 989"},
-  { "name": "Viola", "address": "Sideway 1633"}
+    {"name": "Amy", "address": "Apple st 652"},
+    {"name": "Hannah", "address": "Mountain 21"},
+    {"name": "Michael", "address": "Valley 345"},
+    {"name": "Sandy", "address": "Ocean blvd 2"},
+    {"name": "Betty", "address": "Green Grass 1"},
+    {"name": "Richard", "address": "Sky st 331"},
+    {"name": "Susan", "address": "One way 98"},
+    {"name": "Vicky", "address": "Yellow Garden 2"},
+    {"name": "Ben", "address": "Park Lane 38"},
+    {"name": "William", "address": "Central st 954"},
+    {"name": "Chuck", "address": "Main Road 989"},
+    {"name": "Viola", "address": "Sideway 1633"}
 ]
 
 # mylist = [
@@ -40,16 +41,16 @@ mylist = [
 # { "_id": 14, "name": "Viola", "address": "Sideway 1633"}
 # ]
 
-#x = mycol.insert_one(mydict)
+# x = mycol.insert_one(mydict)
 x = mycol.insert_many(mylist)
 
-#x = mycol.find_one()
+# x = mycol.find_one()
 
 print(x.inserted_ids)
 
 print(x)
 
-#Return all documents in the "customers" collection, and print each document:
+# Return all documents in the "customers" collection, and print each document:
 print("### zwroc wszystko z dokumentu customers kolekcji i wydrukuj")
 for x in mycol.find():
     print(x)
@@ -57,12 +58,12 @@ for x in mycol.find():
 # drukuj ale bez id
 print("### drukuj ale bez id")
 for x in mycol.find({}, {"_id": 0, "name": 1, "address": 1}):
-   print(x)
+    print(x)
 
 # wydrukuj wszystko bez adresu
 print("### wydrukuj wszystko bez adresu")
 for x in mycol.find({}, {"address": 0}):
-   print(x)
+    print(x)
 
 # You get an error if you specify both 0 and 1 values in the same object
 # (except if one of the fields is the _id field):
@@ -75,7 +76,8 @@ myquery = {"address": "Park Lane 38"}
 mydoc = mycol.find(myquery)
 #
 for x in mydoc:
-   print(x)
+    print(x)
+
 
 ###### nieco bardziej skomplikowane zapytanie - wyszukuje zapytania zaczynajace sie litera "S"
 # myquery = {"address": {"$regex": "^S"}}
@@ -118,16 +120,27 @@ for x in mydoc:
 
 
 ############ uodate wiele rekordów
-#myquery = {"address": {"$regex": "^S"}}
-#newvalues = {"$set": {"name": "Minnie"}}
-#x = mycol.update_many(myquery, newvalues)
+# myquery = {"address": {"$regex": "^S"}}
+# newvalues = {"$set": {"name": "Minnie"}}
+# x = mycol.update_many(myquery, newvalues)
 #
-#print(x.modified_count, "documents updated.")
+# print(x.modified_count, "documents updated.")
 
 
 ############ ograniczenie liczby zlapanych rekordow z bazy
-#myresult = mycol.find().limit(5)
+# myresult = mycol.find().limit(5)
 #
 ##print the result:
-#for x in myresult:
+# for x in myresult:
 #  print(x)
+
+
+def def_db_miernik():
+    print("--------------")
+    my_result = db_miernik.zbior_paczek_danych.find()
+    for x in my_result:
+        print(x)
+        print(x['napiecie_w_urzadzeniu'])
+
+
+def_db_miernik()
