@@ -9,35 +9,12 @@ from typing import Optional, List
 from models_miernik import PydanticObjectId
 
 
-def get_paczka_danych_content():
-    myrecord = {
-        "czas_przyjscia_paczki": str(datetime.now()),
-        "kod_status": "000000",
-        "numer_seryjny_urzadzenia": "AXZC78744",
-        "wartosci_pomiaru_sensorow": [
-            {
-                "litera_porzadkowa": "a",
-                "wartosc": random.Random.randint(0, 9)
-            },
-            {
-                "litera_porzadkowa": "b",
-                "wartosc": random.Random.randint(0, 9)
-            },
-            {
-                "litera_porzadkowa": "c",
-                "wartosc": random.Random.randint(0, 9)
-            }
-        ]
-    }
-    return myrecord
-
-
 class PaczkaDanychModel(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id")
     czas_przyjscia_paczki: Optional[str]
     #wartosci: str #encja - wartosci pomiaru
     kod_statusu: str
-    numer_seryjny_urzadzenia: str #sn
+    numer_seryjny_urzadzenia: Optional[str] #sn
 
     class Config:
         allow_population_by_field_name = True

@@ -23,12 +23,12 @@ record = {
   "paczki_danych": "str"
 }
 
-mycol = db_miernik["zbior_dokumentow_sesji"]
-x = mycol.insert_one(record)
-print(x)
+#mycol = db_miernik["zbior_dokumentow_sesji"]
+#x = mycol.insert_one(record)
+#print(x)
 
-for x in mycol.find():
-    print(x)
+#for x in mycol.find():
+#    print(x)
 
 
 class PydanticObjectId(ObjectId):

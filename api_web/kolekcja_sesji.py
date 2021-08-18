@@ -1,4 +1,6 @@
+import json
 from datetime import datetime
+from pprint import pprint
 from typing import Optional
 
 import bson.errors
@@ -9,7 +11,7 @@ from pydantic import BaseModel
 from starlette import status
 from starlette.responses import JSONResponse
 
-from db_models.kolekcja_sesji_model import SesjaModel, get_paczka_danych_content
+from db_models.kolekcja_sesji_model import SesjaModel, PaczkaDanychModel
 from fastapi import APIRouter, Body, HTTPException
 
 from models import db_miernik
@@ -47,10 +49,15 @@ async def create_sesje_bez_id_urzadzenia(sesja: SesjaModel = Body(...)):
 @router.get('/get_kolekcje_sesji', response_description="Zwróć wszystkie sesje")
 async def get_kolekcja_sesji():
     zbior_sesji = []
+    parsed = None
     for sesja in db_miernik.zbior_dokumentow_sesji.find():
         print(sesja)
         zbior_sesji.append(SesjaModel(**sesja))
-    return {"zbior sesji": zbior_sesji}
+        parsed = json.load(sesja)
+        print("Json dumps")
+        #print(json.dumps(parsed, indent=4, sort_keys=True))
+    #json.dumps(parsed, indent=4, sort_keys=True)
+    return {"zbior sesji": json.dumps(parsed, indent=4, sort_keys=True)}
 
 
 @router.get("/get_kolekcje_sesji/id_sesji={id_sesji}", response_description="Zwróć jedną sesję")
@@ -119,46 +126,39 @@ async def drop_sesje():
     return HTTPException(status_code=404, detail=f"Kolekcje sesji nie możesz wyczyścić")
 
 
-
-#@router.put("/stworz_paczke_danych/",
-#            response_description="Dodaj do sesji paczkę danych")
-#async def dodaj_sesji_paczke_danych(id_sesji: str, sesja: SesjaModel):
-#    try:
-#        sesja_find = db_miernik.zbior_dokumentow_sesji.find_one({"_id": ObjectId(id)})
-#        if sesja_find is not None and sesja_find['czy_aktywna'] == "tak":
-#            paczka_danych = get_paczka_danych_content
-#            print(paczka_danych)
-#            #db_miernik.zbior_dokumentow_sesji.update_one({"_id": ObjectId(id_sesji)})
-#    except bson.errors.InvalidId:
-#        raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków !")
-#    #if hasattr(paczka_danych, 'id'):
-#    #    delattr(paczka_danych, 'id')
-#    #db_miernik.zbior_paczek_danych.insert_one(paczka_danych.dict(by_alias=True))
-#    #paczka_danych = jsonable_encoder(paczka_danych)
-#    #return JSONResponse(status_code=status.HTTP_201_CREATED, content=paczka_danych)
-
-
-#@router.put("/stworz_paczke_danych/",
-#            response_description="Dodaj do sesji paczkę danych")
-#async def dodaj_sesji_paczke_danych(id_sesji: str, sesja: SesjaModel):
-#    try:
-#        sesja_find = db_miernik.zbior_dokumentow_sesji.find_one({"_id": ObjectId(id)})
-#        if sesja_find is not None and sesja_find['czy_aktywna'] == "tak":
-#            paczka_danych = get_paczka_danych_content
-#            print(paczka_danych)
-#            #db_miernik.zbior_dokumentow_sesji.update_one({"_id": ObjectId(id_sesji)})
-#    except bson.errors.InvalidId:
-#        raise HTTPException(status_code=404, detail=f"klucz id musi mieć 12 znaków !")
-
-
 @router.put("/stworz_paczke_danych/",
             response_description="Dodaj do sesji paczkę danych")
-async def dodaj_sesji_paczke_danych():
-        #paczka_danych = get_paczka_danych_content
-        #print("paczka_danych: "+paczka_danych)
-        #results = {paczka_danych}
-
-        paczka_danych
-
-        return results
-        #db_miernik.zbior_dokumentow_sesji.update_one({"_id": ObjectId(id_sesji)})
+async def dodawanie_do_aktywnej_sesji_nowej_paczki(paczka: PaczkaDanychModel = Body(...)):
+    zbior_dokumentow_sesji = db_miernik.zbior_dokumentow_sesji
+    liczba_aktywnych_sesji = zbior_dokumentow_sesji.find({"czy_aktywna": "tak"})
+    print(liczba_aktywnych_sesji.count)
+    if liczba_aktywnych_sesji.count() == 1:
+        sesja_aktywna_find = zbior_dokumentow_sesji.find_one({"czy_aktywna": "tak"})
+        print(sesja_aktywna_find)
+        print(sesja_aktywna_find["czy_aktywna"])
+        start_sesji=sesja_aktywna_find["start_sesji"]
+        print(start_sesji)
+        id_sesji = sesja_aktywna_find["_id"]
+        print(id_sesji)
+        if hasattr(paczka, 'id'):
+            delattr(paczka, "id")
+        paczka.czas_przyjscia_paczki = "xfa"
+        paczka.kod_statusu = "casda"
+        paczka.numer_seryjny_urzadzenia = "ahjo"
+        zbior_dokumentow_sesji.update(
+            { "_id": ObjectId(id_sesji)},
+            {
+              "$push":
+                {
+                "lista_paczek_danych":
+                     {
+                         "_id": "1",
+                         "czas_przyjscia_paczki": paczka.czas_przyjscia_paczki,
+                         "kod_status": paczka.kod_statusu,
+                         "numer_seryjny_urzadzenia": paczka.numer_seryjny_urzadzenia
+                         #"PackSizeName":"xyz",
+                         #"UnitName":"Polska"
+                     }
+                }
+            }
+        )
