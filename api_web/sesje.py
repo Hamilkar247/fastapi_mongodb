@@ -135,7 +135,7 @@ async def zakoncz_sesje(id: str):
 
 @router.delete("/delete_sesje/id={id}", response_description="Usuń sesje")
 async def delete_sesja(id: str):
-    delete_result = db_miernik.zbior_sesji.delete_one({"_id": id})
+    delete_result = db_miernik.zbior_sesji.delete_one({"_id": ObjectId(id)})
     if delete_result.deleted_count == 1:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
     raise HTTPException(status_code=403, detail=f"Sesje {id} nie znaleziono")

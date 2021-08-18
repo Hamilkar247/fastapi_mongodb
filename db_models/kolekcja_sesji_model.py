@@ -29,7 +29,7 @@ def get_paczka_danych_content():
             }
         ]
     }
-    return json(myrecord)
+    return myrecord
 
 
 class PaczkaDanychModel(BaseModel):
