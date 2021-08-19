@@ -5,7 +5,7 @@ from internal import admin
 from routers import items, users
 from api_web import sesje, uzytkownicy, urzadzenia, sensory, paczki_danych, wartosci_pomiarow_sensorow, kolekcja_sesji
 
-app = FastAPI()#dependencies=[Depends(get_query_token)])
+app = FastAPI() # dependencies=[Depends(get_query_token)])
 
 #app.include_router(sesje.router)
 #app.include_router(urzadzenia.router)

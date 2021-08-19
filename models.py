@@ -19,20 +19,20 @@ from mongo_models import wektor_danych
 
 client = MongoClient("mongodb://localhost:27017")
 db_miernik = client["api_miernik"]
-print(client.list_database_names())
-dblist = client.list_database_names()
-if "api_miernik" in dblist:
-    print("baza danych już istnieje")
-wektor_probek_col = db_miernik["wektory_probek"]
-wektor_probek = [generateData.generataVector()]
-dane_probkowe = {
-     "temperatura": wektor_probek.__getitem__(0)[0],
-     "pm2_5": wektor_probek.__getitem__(0)[1],
-     "pm5": wektor_probek.__getitem__(0)[2],
-     "pm10": wektor_probek.__getitem__(0)[3],
-     "hydroetyl": wektor_probek.__getitem__(0)[4],
-     "tlen": wektor_probek.__getitem__(0)[5]
-}
+#print(client.list_database_names())
+#dblist = client.list_database_names()
+#if "api_miernik" in dblist:
+#    print("baza danych już istnieje")
+#wektor_probek_col = db_miernik["wektory_probek"]
+#wektor_probek = [generateData.generataVector()]
+#dane_probkowe = {
+#     "temperatura": wektor_probek.__getitem__(0)[0],
+#     "pm2_5": wektor_probek.__getitem__(0)[1],
+#     "pm5": wektor_probek.__getitem__(0)[2],
+#     "pm10": wektor_probek.__getitem__(0)[3],
+#     "hydroetyl": wektor_probek.__getitem__(0)[4],
+#     "tlen": wektor_probek.__getitem__(0)[5]
+#}
 
 
 class PydanticObjectId(ObjectId):

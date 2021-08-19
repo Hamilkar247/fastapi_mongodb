@@ -50,14 +50,14 @@ async def create_sesje_bez_id_urzadzenia(sesja: SesjaModel = Body(...)):
 async def get_kolekcja_sesji():
     zbior_sesji = []
     parsed = None
-    for sesja in db_miernik.zbior_dokumentow_sesji.find():
-        print(sesja)
+    kursor_sesji = db_miernik.zbior_dokumentow_sesji.find()
+    for sesja in kursor_sesji:
+        #print(sesja)
+        #sesja = jsonable_encoder(sesja)
+        #print(sesja)
+        #zbior_sesji.append(sesja.json())
         zbior_sesji.append(SesjaModel(**sesja))
-        parsed = json.load(sesja)
-        print("Json dumps")
-        #print(json.dumps(parsed, indent=4, sort_keys=True))
-    #json.dumps(parsed, indent=4, sort_keys=True)
-    return {"zbior sesji": json.dumps(parsed, indent=4, sort_keys=True)}
+    return {"zbior sesji": zbior_sesji}
 
 
 @router.get("/get_kolekcje_sesji/id_sesji={id_sesji}", response_description="Zwróć jedną sesję")
@@ -78,29 +78,30 @@ async def get_sesje_id(id_sesji: str):
 async def zakoncz_sesje(id_sesji: str):
     try:
         sesja_find = db_miernik.zbior_dokumentow_sesji.find_one({"_id": ObjectId(id_sesji)})
-        #zakładam że raz zamknieta sesja nie bedzie otwierane
+        # zakładam że raz zamknieta sesja nie bedzie otwierane
         if sesja_find is not None and sesja_find['czy_aktywna'] == "tak":
             now = datetime.now()
             print("now =", now)
             dt_string = now.strftime("%d/%m/%y %H:%M:%S")
             print(f"date and time = {dt_string}")
-            #obliczanie dlugosci trwania sesji
+            # obliczanie dlugosci trwania sesji
             start_timestamp = datetime.strptime(sesja_find["start_sesji"], "%d/%m/%y %H:%M:%S").timestamp()
-            end_timestamp=now.timestamp()
+            end_timestamp = now.timestamp()
             print(f"start_timestamp {start_timestamp} end_timestamp {end_timestamp}")
             sesja_find['czy_aktywna'] = "nie"
             sesja_find['koniec_sesji'] = dt_string
             sesja_find['dlugosc_trwania_w_s'] = str(end_timestamp - start_timestamp)
             print(sesja_find)
             db_miernik.zbior_dokumentow_sesji.update_one({"_id": ObjectId(id_sesji)},
-                                         {
-                                             "$set":
-                                             {
-                                                 'czy_aktywna': sesja_find['czy_aktywna'],
-                                                 'koniec_sesji': sesja_find['koniec_sesji'],
-                                                 'dlugosc_trwania_w_s': sesja_find['dlugosc_trwania_w_s']
-                                             }
-                                         })
+                                                         {
+                                                             "$set":
+                                                                 {
+                                                                     'czy_aktywna': sesja_find['czy_aktywna'],
+                                                                     'koniec_sesji': sesja_find['koniec_sesji'],
+                                                                     'dlugosc_trwania_w_s': sesja_find[
+                                                                         'dlugosc_trwania_w_s']
+                                                                 }
+                                                         })
             sesja_element = []
             sesja_element.append(SesjaModel(**sesja_find))
             return {"sesja_element": sesja_element}
@@ -136,7 +137,7 @@ async def dodawanie_do_aktywnej_sesji_nowej_paczki(paczka: PaczkaDanychModel = B
         sesja_aktywna_find = zbior_dokumentow_sesji.find_one({"czy_aktywna": "tak"})
         print(sesja_aktywna_find)
         print(sesja_aktywna_find["czy_aktywna"])
-        start_sesji=sesja_aktywna_find["start_sesji"]
+        start_sesji = sesja_aktywna_find["start_sesji"]
         print(start_sesji)
         id_sesji = sesja_aktywna_find["_id"]
         print(id_sesji)
@@ -146,19 +147,19 @@ async def dodawanie_do_aktywnej_sesji_nowej_paczki(paczka: PaczkaDanychModel = B
         paczka.kod_statusu = "casda"
         paczka.numer_seryjny_urzadzenia = "ahjo"
         zbior_dokumentow_sesji.update(
-            { "_id": ObjectId(id_sesji)},
+            {"_id": ObjectId(id_sesji)},
             {
-              "$push":
-                {
-                "lista_paczek_danych":
-                     {
-                         "_id": "1",
-                         "czas_przyjscia_paczki": paczka.czas_przyjscia_paczki,
-                         "kod_status": paczka.kod_statusu,
-                         "numer_seryjny_urzadzenia": paczka.numer_seryjny_urzadzenia
-                         #"PackSizeName":"xyz",
-                         #"UnitName":"Polska"
-                     }
-                }
+                "$push":
+                    {
+                        "lista_paczek_danych":
+                            {
+                                "_id": "1",
+                                "czas_przyjscia_paczki": paczka.czas_przyjscia_paczki,
+                                "kod_status": paczka.kod_statusu,
+                                "numer_seryjny_urzadzenia": paczka.numer_seryjny_urzadzenia
+                                # "PackSizeName":"xyz",
+                                # "UnitName":"Polska"
+                            }
+                    }
             }
         )
